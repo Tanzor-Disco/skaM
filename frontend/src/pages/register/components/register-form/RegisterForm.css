@@ -1,0 +1,9 @@
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.form-submit {
+    width: 271px;
+}

@@ -1,0 +1,20 @@
+.items-align {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.main-input {
+    width: 300px;
+}
+
+.submit-button {
+    width: 300px;
+}

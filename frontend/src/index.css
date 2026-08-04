@@ -1,0 +1,73 @@
+:root {
+    --background: #18181b;
+    --text: white;
+    --accent-dark: #29501e;
+    --accent: #356a28;
+    --surface: #2c2c2c;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    background-color: var(--background);
+    font-family: 'Inter', sans-serif;
+}
+
+p {
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+h1 {
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--text);
+}
+
+h2 {
+    font-weight: 400;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+button {
+    width: 100px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 400;
+    font-size: 1.1rem;
+    background-color: var(--accent-dark);
+    color: var(--text);
+}
+button:active {
+    box-shadow: 2px 2px 5px var(--accent);
+}
+
+img {
+    width: 80px;
+}
+
+label {
+    font-weight: 400;
+    color: var(--text);
+}
+
+input {
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--surface);
+    color: var(--text);
+    font-size: 1.2rem;
+    padding: 5px;
+}
+
+a {
+    font-weight: 400;
+    color: var(--accent);
+    text-decoration: none;
+}

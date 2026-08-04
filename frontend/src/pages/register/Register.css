@@ -1,0 +1,4 @@
+.page-center {
+    display: flex;
+    flex-direction: column;
+}
