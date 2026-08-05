@@ -1,8 +1,9 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v4/pgxpool"
 	"context"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"log"
 )
 
 type User struct {
@@ -31,17 +32,17 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
-func Connect(URI string) (DB,error) {
+func Connect(URI string) (*DB,error) {
 	pool,err := pgxpool.Connect(context.Background(),URI)
 	if err != nil {
-		return DB{},err
+		return &DB{},err
 	}
-	return DB {
+	return &DB {
 		pool:pool,
 	}, nil
 }
 
-func (db DB) CreateUser(user User) error {
+func (db *DB) CreateUser(user User) error {
 	_,err := db.pool.Exec(context.Background(),
 	`
 	INSERT INTO users (username,email,password_hash,last_year_active)
@@ -52,7 +53,7 @@ func (db DB) CreateUser(user User) error {
 	return err
 }
 
-func (db DB) CreateRoom(room Room) error {
+func (db *DB) CreateRoom(room Room) error {
 	_,err := db.pool.Exec(context.Background(),
 	`
 	INSERT INTO rooms (room_name)
@@ -63,7 +64,7 @@ func (db DB) CreateRoom(room Room) error {
 	return err
 }
 
-func (db DB) CreateMessage(message Message) error {
+func (db *DB) CreateMessage(message Message) error {
 	_,err := db.pool.Exec(context.Background(),
 	`
 	INSERT INTO messages (user_id,room_id,message_text)
@@ -74,7 +75,7 @@ func (db DB) CreateMessage(message Message) error {
 	return err
 }
 
-func (db DB) AddUserToRoom(roomUser RoomUser) error {
+func (db *DB) AddUserToRoom(roomUser RoomUser) error {
 	_,err := db.pool.Exec(context.Background(),
 	`
 	INSERT INTO messages (user_id,room_id)
@@ -85,4 +86,34 @@ func (db DB) AddUserToRoom(roomUser RoomUser) error {
 	return err
 }
 
+func (db *DB) GetUsers() ([]User,error) {
+	rows,err := db.pool.Query(context.Background(),`
+	SELECT * FROM users
+	`)
+	if err != nil {
+		return make([]User,0),err
+	}
+	defer rows.Close()
+	var users []User
+	var id int 
+	for rows.Next() {
+		var user User
+		 if err := rows.Scan(&id,&user.Email,&user.Name,&user.PasswordHash,&user.LastYearActive);err != nil {
+			 log.Println(err)
+			 continue
+		 }
+		 users = append(users,user)
+	}
+	return users,nil
+}
 
+func (db *DB) RemoveAllUsers() error {
+	 _,err := db.pool.Exec(context.Background(),`
+	 DELETE FROM users
+	 `,
+ 	)
+	 if err != nil {
+		 return err
+	 }
+	 return nil
+}

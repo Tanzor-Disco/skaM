@@ -4,6 +4,7 @@
     --accent-dark: #29501e;
     --accent: #356a28;
     --surface: #2c2c2c;
+	--error: #B91C1C;
 }
 
 html {
@@ -70,4 +71,10 @@ a {
     font-weight: 400;
     color: var(--accent);
     text-decoration: none;
+}
+
+.error-message {
+	font-weight:400;
+	color:var(--error);
+	font-size:0.8rem;
 }

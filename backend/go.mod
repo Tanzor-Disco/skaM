@@ -2,7 +2,11 @@ module github.com/Tanzor-Disco/skaM
 
 go 1.26.4
 
-require github.com/jackc/pgx/v4 v4.18.3
+require (
+	github.com/jackc/pgx/v4 v4.18.3
+	github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
+	golang.org/x/crypto v0.20.0
+)
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -13,6 +17,5 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/jackc/puddle v1.3.0 // indirect
-	golang.org/x/crypto v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
