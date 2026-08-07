@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
 	id BIGSERIAL PRIMARY KEY,
-	username VARCHAR(20),
 	email TEXT UNIQUE,
+	username VARCHAR(20),
 	password_hash TEXT,
 	last_year_active SMALLINT
 );

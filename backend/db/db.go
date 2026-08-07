@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	Name string
+	Username string
 	Email string
 	PasswordHash string
 	LastYearActive int
@@ -42,13 +42,17 @@ func Connect(URI string) (*DB,error) {
 	}, nil
 }
 
+func (db *DB) Close() {
+	db.pool.Close()
+}
+
 func (db *DB) CreateUser(user User) error {
 	_,err := db.pool.Exec(context.Background(),
 	`
-	INSERT INTO users (username,email,password_hash,last_year_active)
+	INSERT INTO users (email,username,password_hash,last_year_active)
 	VALUES ($1,$2,$3,$4)
 	`,
-	user.Name,user.Email,user.PasswordHash,user.LastYearActive,
+	user.Email,user.Username,user.PasswordHash,user.LastYearActive,
 	)
 	return err
 }
@@ -98,7 +102,7 @@ func (db *DB) GetUsers() ([]User,error) {
 	var id int 
 	for rows.Next() {
 		var user User
-		 if err := rows.Scan(&id,&user.Email,&user.Name,&user.PasswordHash,&user.LastYearActive);err != nil {
+		 if err := rows.Scan(&id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive);err != nil {
 			 log.Println(err)
 			 continue
 		 }
@@ -107,13 +111,3 @@ func (db *DB) GetUsers() ([]User,error) {
 	return users,nil
 }
 
-func (db *DB) RemoveAllUsers() error {
-	 _,err := db.pool.Exec(context.Background(),`
-	 DELETE FROM users
-	 `,
- 	)
-	 if err != nil {
-		 return err
-	 }
-	 return nil
-}
