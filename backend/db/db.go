@@ -2,19 +2,18 @@ package db
 
 import (
 	"context"
-	"log"
+	"errors"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgerrcode"
-	"errors"
+	"log"
 )
 
-
 type User struct {
-	Username string
-	Email string
-	PasswordHash string
+	Username       string
+	Email          string
+	PasswordHash   string
 	LastYearActive int
 }
 
@@ -25,7 +24,7 @@ type Room struct {
 type Message struct {
 	UserId int
 	RoomId int
-	Text string
+	Text   string
 }
 
 type RoomUser struct {
@@ -37,13 +36,13 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
-func Connect(URI string) (*DB,error) {
-	pool,err := pgxpool.New(context.Background(),URI)
+func Connect(URI string) (*DB, error) {
+	pool, err := pgxpool.New(context.Background(), URI)
 	if err != nil {
-		return &DB{},err
+		return &DB{}, err
 	}
-	return &DB {
-		pool:pool,
+	return &DB{
+		pool: pool,
 	}, nil
 }
 
@@ -52,12 +51,12 @@ func (db *DB) Close() {
 }
 
 func (db *DB) CreateUser(user User) error {
-	_,err := db.pool.Exec(context.Background(),
-	`
+	_, err := db.pool.Exec(context.Background(),
+		`
 	INSERT INTO users (email,username,password_hash,last_year_active)
 	VALUES ($1,$2,$3,$4)
 	`,
-	user.Email,user.Username,user.PasswordHash,user.LastYearActive,
+		user.Email, user.Username, user.PasswordHash, user.LastYearActive,
 	)
 
 	var PgErr *pgconn.PgError
@@ -68,56 +67,55 @@ func (db *DB) CreateUser(user User) error {
 }
 
 func (db *DB) CreateRoom(room Room) error {
-	_,err := db.pool.Exec(context.Background(),
-	`
+	_, err := db.pool.Exec(context.Background(),
+		`
 	INSERT INTO rooms (room_name)
 	VALUES ($1)
 	`,
-	room.Name,
+		room.Name,
 	)
 	return err
 }
 
 func (db *DB) CreateMessage(message Message) error {
-	_,err := db.pool.Exec(context.Background(),
-	`
+	_, err := db.pool.Exec(context.Background(),
+		`
 	INSERT INTO messages (user_id,room_id,message_text)
 	VALUES ($1,$2,$3)
 	`,
-	message.UserId,message.RoomId,message.Text,
+		message.UserId, message.RoomId, message.Text,
 	)
 	return err
 }
 
 func (db *DB) AddUserToRoom(roomUser RoomUser) error {
-	_,err := db.pool.Exec(context.Background(),
-	`
+	_, err := db.pool.Exec(context.Background(),
+		`
 	INSERT INTO messages (user_id,room_id)
 	VALUES ($1,$2)
 	`,
-	roomUser.UserId,roomUser.RoomId,
+		roomUser.UserId, roomUser.RoomId,
 	)
 	return err
 }
 
-func (db *DB) GetUsers() ([]User,error) {
-	rows,err := db.pool.Query(context.Background(),`
+func (db *DB) GetUsers() ([]User, error) {
+	rows, err := db.pool.Query(context.Background(), `
 	SELECT * FROM users
 	`)
 	if err != nil {
-		return make([]User,0),err
+		return make([]User, 0), err
 	}
 	defer rows.Close()
 	var users []User
-	var id int 
+	var id int
 	for rows.Next() {
 		var user User
-		 if err := rows.Scan(&id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive);err != nil {
-			 log.Println(err)
-			 continue
-		 }
-		 users = append(users,user)
+		if err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive); err != nil {
+			log.Println(err)
+			continue
+		}
+		users = append(users, user)
 	}
-	return users,nil
+	return users, nil
 }
-

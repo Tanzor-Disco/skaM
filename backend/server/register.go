@@ -1,36 +1,25 @@
 package server
+
 import (
-	"net/http"
-	"io"
 	"encoding/json"
-	"time"
-	"golang.org/x/crypto/bcrypt"
+	"errors"
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
-	"errors"
-
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
+	"time"
 )
 
 type userData struct {
-	Email string
+	Email    string
 	Username string
 	Password string
 }
 
-func readHTTP(req *http.Request) ([]byte,error){
-	defer req.Body.Close()
-	buf,err := io.ReadAll(req.Body)
-	if err != nil {
-		return make([]byte,0),err
-	}
-	return buf,nil
-
-}
-
-func getUserData(buf []byte) (userData,error) {
-	var currUser userData 
-	err := json.Unmarshal(buf,&currUser)
-	return currUser,err
+func getUserData(request *http.Request) (userData, error) {
+	var currUser userData
+	err := json.NewDecoder(request.Body).Decode(&currUser)
+	return currUser, err
 }
 
 func (s *server) registerUser(userDB db.User) error {
@@ -38,53 +27,43 @@ func (s *server) registerUser(userDB db.User) error {
 	return err
 }
 
-func (s *server) handleRegister( w http.ResponseWriter, req *http.Request) {
-	buf,err := readHTTP(req)
+func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
+	currUser, err := getUserData(req)
 	if err != nil {
-		body := newServerResponseBody(false,err,"ERR_REQUEST_BODY_READ")
-		sendJSON(w,http.StatusBadRequest,body)
-		return 
+		body := newServerResponseBody(false, err, apperrors.KindErrInvalidJSON)
+		sendJSON(w, http.StatusBadRequest, body)
+		return
 	}
 
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(currUser.Password), bcrypt.DefaultCost)
+	if err != nil {
+		body := newServerResponseBody(false, err, apperrors.KindErrHashingPassword)
+		sendJSON(w, http.StatusInternalServerError, body)
+		return
+	}
 
-	currUser,err := getUserData(buf)
-	if err != nil {
-		body := newServerResponseBody(false,err,"ERR_INVALID_JSON")
-		sendJSON(w,http.StatusBadRequest,body)
-		return 
-	}
-	
-	passwordHash,err := bcrypt.GenerateFromPassword([]byte(currUser.Password),bcrypt.DefaultCost)
-	if err != nil {
-		body := newServerResponseBody(false,err,"ERR_HASHING_PASSWORD")
-		sendJSON(w,http.StatusInternalServerError,body)
-		return 
-	}
-	
 	date := time.Now().Year()
-	userDB := db.User {
-		Email:currUser.Email,
-		Username:currUser.Username,
-		PasswordHash: string(passwordHash),
-		LastYearActive:date,
-
+	userDB := db.User{
+		Email:          currUser.Email,
+		Username:       currUser.Username,
+		PasswordHash:   string(passwordHash),
+		LastYearActive: date,
 	}
 	err = s.registerUser(userDB)
 	if err != nil {
 		var body serverResponseBody
-		if errors.Is(err,apperrors.ErrEmailTaken) {
-			body = newServerResponseBody(false,err,"ERR_EMAIL_TAKEN")
-			sendJSON(w,http.StatusBadRequest,body)
-		} else {
-			body = newServerResponseBody(false,err,"ERR_DB")
-			sendJSON(w,http.StatusInternalServerError,body)
-		} 
+		if errors.Is(err, apperrors.ErrEmailTaken) {
+			body = newServerResponseBody(false, err, apperrors.KindErrEmailTaken)
+			sendJSON(w, http.StatusBadRequest, body)
+			return
+		}
 
-		return 
+		body = newServerResponseBody(false, err, apperrors.KindErrDB)
+		sendJSON(w, http.StatusInternalServerError, body)
+		return
 	}
-	
-	body := newServerResponseBody(true,nil,"ERR_NONE")
-	sendJSON(w,http.StatusOK,body)
+
+	body := newServerResponseBody(true, nil, apperrors.KindErrNone)
+	sendJSON(w, http.StatusOK, body)
 
 }
-
