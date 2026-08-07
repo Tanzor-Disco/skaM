@@ -21,30 +21,33 @@ func newServer(URI string) (*server,error) {
 	},nil
 }
 
-type serverResponse struct {
-	Success bool
-	Error string
-	Message string
+type serverResponseBody struct {
+	Success bool `json:"success"`
+	Error string `json:"error"`
+	ErrorKind string `json:"error_kind"`
 }
 
-func sendJSON(w http.ResponseWriter,success bool,message string, err error,code int) {
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(code)
-
+func newServerResponseBody(success bool,err error, errorKind string) serverResponseBody {
 	var errorMessage string
 	if err != nil {
 		errorMessage = err.Error()
 	}
-	response := serverResponse {
-		Success:success,
-		Error:errorMessage,
-		Message:message,
+	return serverResponseBody {
+		Success: success, 
+		Error: errorMessage,
+		ErrorKind: errorKind,
 	}
-	body,err := json.Marshal(response)
+}
+
+func sendJSON(w http.ResponseWriter,code int, body serverResponseBody) {
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(code)
+
+	bodyBytes,err := json.Marshal(body)
 	if err != nil {
 		log.Println(err)
 	}
-	_,err = w.Write(body)
+	_,err = w.Write(bodyBytes)
 	if err != nil {
 		log.Println(err)
 	}

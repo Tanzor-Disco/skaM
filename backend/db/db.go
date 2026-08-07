@@ -2,9 +2,14 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
+	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgerrcode"
+	"errors"
 )
+
 
 type User struct {
 	Username string
@@ -33,7 +38,7 @@ type DB struct {
 }
 
 func Connect(URI string) (*DB,error) {
-	pool,err := pgxpool.Connect(context.Background(),URI)
+	pool,err := pgxpool.New(context.Background(),URI)
 	if err != nil {
 		return &DB{},err
 	}
@@ -54,6 +59,11 @@ func (db *DB) CreateUser(user User) error {
 	`,
 	user.Email,user.Username,user.PasswordHash,user.LastYearActive,
 	)
+
+	var PgErr *pgconn.PgError
+	if errors.As(err, &PgErr) && PgErr.Code == pgerrcode.UniqueViolation {
+		err = apperrors.ErrEmailTaken
+	}
 	return err
 }
 

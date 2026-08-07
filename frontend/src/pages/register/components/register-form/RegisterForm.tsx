@@ -16,12 +16,12 @@ export default function RegisterForm() {
 		})
 		if (!response.ok) {
 			const responseObj = await response.json()
-			if (responseObj.message === "The email is already taken") {
-				setWarningVisible(prevWarning => !prevWarning)
+			if (responseObj.error_kind === "ERR_EMAIL_TAKEN") {
+				setWarningVisible(true)
 				return 
 			}
 		}
-		setWarningVisible(prevWarning => !prevWarning)
+		setWarningVisible(false)
 	}
 	
     return (
