@@ -9,18 +9,18 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/validate"
+	"github.com/Tanzor-Disco/skaM/models"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
-type userData struct {
-	Email    string
-	Username string
-	Password string
-}
 
-func getUserData(request *http.Request) (userData, error) {
-	var currUser userData
+
+func getUserData(request *http.Request) (models.RegisterRequest, error) {
+	var currUser models.RegisterRequest
 	err := json.NewDecoder(request.Body).Decode(&currUser)
+	err = validate.RegisterRequest(currUser)
 	return currUser, err
 }
 
@@ -33,14 +33,16 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	currUser, err := getUserData(req)
 	if err != nil {
-		body := newServerResponseBody(false, err, apperrors.KindErrInvalidJSON)
+		body := newServerResponseBody(false, apperrors.KindErrInvalidJSON)
+		log.Printf("handleRegister error: %v",err)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
-
+	
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(currUser.Password), bcrypt.DefaultCost)
 	if err != nil {
-		body := newServerResponseBody(false, err, apperrors.KindErrHashingPassword)
+		body := newServerResponseBody(false, apperrors.KindErrHashingPassword)
+		log.Printf("handleRegister error: %v",err)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
@@ -56,17 +58,19 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		var body serverResponseBody
 		if errors.Is(err, apperrors.ErrEmailTaken) {
-			body = newServerResponseBody(false, err, apperrors.KindErrEmailTaken)
+			body = newServerResponseBody(false, apperrors.KindErrEmailTaken)
+			log.Printf("handleRegister error: %v",err)
 			sendJSON(w, http.StatusBadRequest, body)
 			return
 		}
 
-		body = newServerResponseBody(false, err, apperrors.KindErrDB)
+		body = newServerResponseBody(false, apperrors.KindErrDB)
+		log.Printf("handleRegister error: %v",err)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
-	body := newServerResponseBody(true, nil, apperrors.KindErrNone)
+	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)
 
 }

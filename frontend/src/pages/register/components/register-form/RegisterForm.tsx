@@ -27,11 +27,11 @@ export default function RegisterForm() {
     return (
         <form className="register-form" action={handleSubmit}>
 			<div className={warningVisible ? "smaller-margin" : undefined}>
-				<InputField fieldName={'Email'} required={true} />
+				<InputField fieldName={'Email'} inputType={"email"} required={true} />
 				{warningVisible && <p className="error-message">The email is already taken</p>}
 			</div>
-            <InputField fieldName={'Username'} required={true} />
-            <InputField fieldName={'Password'} required={true} />
+            <InputField fieldName={'Username'} inputType={"text"} required={true} />
+            <InputField fieldName={'Password'} inputType={"text"} required={true} />
             <button className="form-submit">Submit</button>
         </form>
     )

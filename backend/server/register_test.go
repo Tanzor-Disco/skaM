@@ -11,6 +11,7 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
+	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/lpernett/godotenv"
 )
 
@@ -38,7 +39,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func handleUser(t *testing.T, user userData) *httptest.ResponseRecorder {
+func handleUser(t *testing.T, user models.RegisterRequest) *httptest.ResponseRecorder {
 	t.Helper()
 	bodyBytes, err := json.Marshal(user)
 	if err != nil {
@@ -66,20 +67,20 @@ func validateResponseBody(t *testing.T, resp *http.Response, correct serverRespo
 	if err != nil {
 		t.Fatalf("Failed to decode json: %v", err)
 	}
-	if body.Success != correct.Success || body.Error != correct.Error || body.ErrorKind != correct.ErrorKind {
+	if body.Success != correct.Success || body.ErrorKind != correct.ErrorKind {
 		t.Fatalf("Body of the response is incorrect:\n Got %+v\n Wanted %+v", body, correct)
 	}
 
 }
 
 func TestHandleRequest_Valid(t *testing.T) {
-	user := userData{
+	user := models.RegisterRequest {
 		Email:    "pidoras_@mail.ru",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
 
-	correct := newServerResponseBody(true, nil, apperrors.KindErrNone)
+	correct := newServerResponseBody(true, apperrors.KindErrNone)
 	serverRecorder := handleUser(t, user)
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
@@ -88,12 +89,12 @@ func TestHandleRequest_Valid(t *testing.T) {
 }
 
 func TestHandleRequest_Duplicate(t *testing.T) {
-	user := userData{
+	user := models.RegisterRequest {
 		Email:    "pidoras_@mail.ru",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
-	correct := newServerResponseBody(false, apperrors.ErrEmailTaken, apperrors.KindErrEmailTaken)
+	correct := newServerResponseBody(false, apperrors.KindErrEmailTaken)
 	//creating the first user
 	handleUser(t, user)
 	//creating a duplicate

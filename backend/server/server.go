@@ -23,18 +23,12 @@ func newServer(URI string) (*server, error) {
 
 type serverResponseBody struct {
 	Success   bool   `json:"success"`
-	Error     string `json:"error"`
 	ErrorKind string `json:"error_kind"`
 }
 
-func newServerResponseBody(success bool, err error, errorKind string) serverResponseBody {
-	var errorMessage string
-	if err != nil {
-		errorMessage = err.Error()
-	}
-	return serverResponseBody{
+func newServerResponseBody(success bool, errorKind string) serverResponseBody {
+	return serverResponseBody {
 		Success:   success,
-		Error:     errorMessage,
 		ErrorKind: errorKind,
 	}
 }
