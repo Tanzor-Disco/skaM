@@ -1,13 +1,15 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"time"
 )
 
 type userData struct {
@@ -22,12 +24,13 @@ func getUserData(request *http.Request) (userData, error) {
 	return currUser, err
 }
 
-func (s *server) registerUser(userDB db.User) error {
-	err := s.db.CreateUser(userDB)
+func (s *server) registerUser(ctx context.Context, userDB db.User) error {
+	err := s.db.CreateUser(ctx,userDB)
 	return err
 }
 
 func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	currUser, err := getUserData(req)
 	if err != nil {
 		body := newServerResponseBody(false, err, apperrors.KindErrInvalidJSON)
@@ -49,7 +52,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		PasswordHash:   string(passwordHash),
 		LastYearActive: date,
 	}
-	err = s.registerUser(userDB)
+	err = s.registerUser(ctx,userDB)
 	if err != nil {
 		var body serverResponseBody
 		if errors.Is(err, apperrors.ErrEmailTaken) {

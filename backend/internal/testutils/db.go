@@ -7,6 +7,7 @@ import (
 )
 
 type UserRow struct {
+	Id int
 	Email string
 	Username string
 	PasswordHash string
@@ -46,8 +47,7 @@ func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []UserRow {
 
 	for rows.Next() {
 		var user UserRow
-		var id int
-		err := rows.Scan(&id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive)
+		err := rows.Scan(&user.Id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -68,3 +68,23 @@ func (tdb *TestDB) DeleteUsersByEmail(t *testing.T, email string) {
 	}
 }
 
+
+func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
+	rows,err := tdb.pool.Query(context.Background(),
+	`
+	SELECT * FROM users
+	`)
+	if err != nil {
+		t.Fatal(err)
+		return 
+	}
+	for rows.Next() {
+		var user UserRow
+		err := rows.Scan(&user.Id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive)
+		if err != nil {
+			t.Fatal(err)
+		}
+		userRows = append(userRows,user)
+	}
+	return 
+}

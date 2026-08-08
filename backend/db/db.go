@@ -50,8 +50,8 @@ func (db *DB) Close() {
 	db.pool.Close()
 }
 
-func (db *DB) CreateUser(user User) error {
-	_, err := db.pool.Exec(context.Background(),
+func (db *DB) CreateUser(ctx context.Context, user User) error {
+	_, err := db.pool.Exec(ctx,
 		`
 	INSERT INTO users (email,username,password_hash,last_year_active)
 	VALUES ($1,$2,$3,$4)
@@ -66,7 +66,7 @@ func (db *DB) CreateUser(user User) error {
 	return err
 }
 
-func (db *DB) CreateRoom(room Room) error {
+func (db *DB) CreateRoom(ctx context.Context, room Room) error {
 	_, err := db.pool.Exec(context.Background(),
 		`
 	INSERT INTO rooms (room_name)
@@ -77,7 +77,7 @@ func (db *DB) CreateRoom(room Room) error {
 	return err
 }
 
-func (db *DB) CreateMessage(message Message) error {
+func (db *DB) CreateMessage(ctx context.Context, message Message) error {
 	_, err := db.pool.Exec(context.Background(),
 		`
 	INSERT INTO messages (user_id,room_id,message_text)
@@ -88,7 +88,7 @@ func (db *DB) CreateMessage(message Message) error {
 	return err
 }
 
-func (db *DB) AddUserToRoom(roomUser RoomUser) error {
+func (db *DB) AddUserToRoom(ctx context.Context, roomUser RoomUser) error {
 	_, err := db.pool.Exec(context.Background(),
 		`
 	INSERT INTO messages (user_id,room_id)
