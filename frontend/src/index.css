@@ -78,3 +78,8 @@ a {
 	color:var(--error);
 	font-size:0.8rem;
 }
+
+.position-absolute {
+	position:absolute;
+	top:100%;
+}

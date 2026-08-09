@@ -1,13 +1,10 @@
 .register-form {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+	gap:50px;
 }
 
 .form-submit {
     width: 271px;
 }
 
-.smaller-margin {
-	margin-bottom:-30px;
-}

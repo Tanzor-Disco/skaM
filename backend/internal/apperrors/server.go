@@ -12,11 +12,12 @@ var ErrInvalidUsernameLength = errors.New("invalid username length")
 
 //error kinds for http responses
 const (
-	KindErrRequestBodyRead = "ERR_REQUEST_BODY_READ"
-	KindErrInvalidJSON = "ERR_INVALID_JSON"
 	KindErrHashingPassword = "ERR_HASHING_PASSWORD"
 	KindErrEmailTaken = "ERR_EMAIL_TAKEN"
 	KindErrDB = "ERR_DB"
-	KindErrNone = "ERR_NONE"
 	KindErrInvalidEmail = "ERR_INVALID_EMAIL"
+	KindErrInvalidUsernameLength = "ERR_INVALID_USERNAME_LENGTH"
+	KindErrForbiddenPasswordChars = "ERR_FORBIDDEN_PASSWORD_CHARS"
+	KindErrInvalidPasswordLength = "ERR_INVALID_PASSWORD_LENGTH"
+	KindErrNone = "ERR_NONE"
 )

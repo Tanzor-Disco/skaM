@@ -1,9 +1,34 @@
 import './RegisterForm.css'
 import InputField from '@/components/input-field/InputField'
+import FormField from "./components/FormField"
 import {useState} from "react"
 
+
 export default function RegisterForm() {
-	const [warningVisible,setWarningVisible] = useState(false)
+	const [emailErr,setEmailErr] = useState("")
+	const [usernameErr,setUsernameErr] = useState("")
+	const [passwordErr,setPasswordErr] = useState("")
+
+
+	function toggleState(errorKind:string) {
+		switch (errorKind) {
+			case "ERR_EMAIL_TAKEN":
+				setEmailErr("Email is already taken")
+				break
+			case "ERR_INVALID_USERNAME_LENGTH":
+				setUsernameErr("The maximum length of the username is 20 characters")
+				break
+			case "ERR_FORBIDDEN_PASSWORD_CHARS":
+				setPasswordErr("The password should contain only latin characters and digits")
+				break
+			case "ERR_INVALID_PASSWORD_LENGTH":
+				setPasswordErr("The maximum length of the password is 70 characters")
+		}
+	}
+	function toggleAllOff() {
+		setEmailErr("")
+		setUsernameErr("")
+	}
 
 	async function handleSubmit(formData:FormData) {
 		const objData = Object.fromEntries(formData)
@@ -14,25 +39,33 @@ export default function RegisterForm() {
 			},
 			body:JSON.stringify(objData),
 		})
+
 		if (!response.ok) {
 			const responseObj = await response.json()
-			if (responseObj.error_kind === "ERR_EMAIL_TAKEN") {
-				setWarningVisible(true)
-				return 
-			}
+			toggleAllOff()
+			toggleState(responseObj.error_kind)
+			return
 		}
-		setWarningVisible(false)
 	}
 	
     return (
         <form className="register-form" action={handleSubmit}>
-			<div className={warningVisible ? "smaller-margin" : undefined}>
-				<InputField fieldName={'Email'} inputType={"email"} required={true} />
-				{warningVisible && <p className="error-message">The email is already taken</p>}
-			</div>
-            <InputField fieldName={'Username'} inputType={"text"} required={true} />
-            <InputField fieldName={'Password'} inputType={"text"} required={true} />
-            <button className="form-submit">Submit</button>
+			<FormField 
+			warning={emailErr} 
+			fieldName={"Email"} 
+			inputType={"email"}
+			/>
+			<FormField 
+			warning={usernameErr}
+			fieldName={"Username"}
+			inputType={"text"}
+			/>
+			<FormField 
+			warning={passwordErr}
+			fieldName={"Password"}
+			inputType={"text"}
+			/>
+        	<button className="form-submit">Submit</button>
         </form>
     )
 }

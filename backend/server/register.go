@@ -24,6 +24,21 @@ func getUserData(request *http.Request) (models.RegisterRequest, error) {
 	return currUser, err
 }
 
+func getUserDataErrorBody(err error) serverResponseBody {
+	var body serverResponseBody
+	switch err {
+		case apperrors.ErrInvalidEmail:
+			body = newServerResponseBody(false,apperrors.KindErrInvalidEmail)
+		case apperrors.ErrInvalidUsernameLength:
+			body = newServerResponseBody(false,apperrors.KindErrInvalidUsernameLength)
+		case apperrors.ErrInvalidPasswordChars:
+			body = newServerResponseBody(false,apperrors.KindErrForbiddenPasswordChars)
+		case apperrors.ErrInvalidPasswordLength:
+			body = newServerResponseBody(false,apperrors.KindErrInvalidPasswordLength)
+	}
+	return body
+}
+
 func (s *server) registerUser(ctx context.Context, userDB db.User) error {
 	err := s.db.CreateUser(ctx,userDB)
 	return err
@@ -33,7 +48,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	currUser, err := getUserData(req)
 	if err != nil {
-		body := newServerResponseBody(false, apperrors.KindErrInvalidJSON)
+		body := getUserDataErrorBody(err)
 		log.Printf("handleRegister error: %v",err)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
