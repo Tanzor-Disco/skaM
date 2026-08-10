@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Tanzor-Disco/skaM/server"
+	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/lpernett/godotenv"
 )
 
@@ -25,10 +26,19 @@ func getURI() (string, error) {
 	return "", errors.New("Didn't find a .env file")
 }
 
+var migrationsSource = "file://db/migrations"
+
 func main() {
+	
 	URI, err := getURI()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = migrations.Update(migrationsSource,URI)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Fatal(server.Run(URI))
 }

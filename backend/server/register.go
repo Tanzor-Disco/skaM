@@ -9,8 +9,9 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
-	"github.com/Tanzor-Disco/skaM/validate"
+	"github.com/Tanzor-Disco/skaM/check/validate"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/check/verify"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -29,6 +30,8 @@ func getUserDataErrorBody(err error) serverResponseBody {
 	switch err {
 		case apperrors.ErrInvalidEmail:
 			body = newServerResponseBody(false,apperrors.KindErrInvalidEmail)
+		case apperrors.ErrInvalidEmailLength:
+			body = newServerResponseBody(false,apperrors.KindErrInvalidEmailLength)
 		case apperrors.ErrInvalidUsernameLength:
 			body = newServerResponseBody(false,apperrors.KindErrInvalidUsernameLength)
 		case apperrors.ErrInvalidPasswordChars:
@@ -39,8 +42,8 @@ func getUserDataErrorBody(err error) serverResponseBody {
 	return body
 }
 
-func (s *server) registerUser(ctx context.Context, userDB db.User) error {
-	err := s.db.CreateUser(ctx,userDB)
+func (s *server) registerUser(ctx context.Context, userDB db.PendingUser) error {
+	err := s.db.CreatePendingUser(ctx,userDB)
 	return err
 }
 
@@ -62,14 +65,22 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	date := time.Now().Year()
-	userDB := db.User{
+	expiresAt := time.Now().Add(time.Hour)
+	//TODO: add a function that sends a letter to the user and uses the token; change _ for token
+	_, tokenHash,err := verify.CreateToken()
+	if err != nil {
+		body := newServerResponseBody(false, apperrors.KindErrTokenCreation)
+		log.Printf("handleRegister error: %v",err)
+		sendJSON(w,http.StatusInternalServerError,body)
+	}
+	pendingUserDB := db.PendingUser {
 		Email:          currUser.Email,
 		Username:       currUser.Username,
+		TokenHash:		tokenHash,
 		PasswordHash:   string(passwordHash),
-		LastYearActive: date,
+		ExpiresAt: expiresAt,
 	}
-	err = s.registerUser(ctx,userDB)
+	err = s.registerUser(ctx,pendingUserDB)
 	if err != nil {
 		var body serverResponseBody
 		if errors.Is(err, apperrors.ErrEmailTaken) {

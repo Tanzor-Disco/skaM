@@ -11,6 +11,9 @@ func validateEmail(address string) error {
 	if err == nil  && addr.Address == address {
 		return nil
 	}
+	if len(address) > 300 {
+		return apperrors.ErrInvalidEmailLength
+	}
 	return apperrors.ErrInvalidEmail
 }
 

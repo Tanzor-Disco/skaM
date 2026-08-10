@@ -7,14 +7,24 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"time"
 	"log"
 )
 
 type User struct {
-	Username       string
 	Email          string
+	Username       string
 	PasswordHash   string
 	LastYearActive int
+}
+
+type PendingUser struct {
+	Id int
+	Email string
+	Username string
+	PasswordHash string
+	TokenHash string
+	ExpiresAt time.Time
 }
 
 type Room struct {
@@ -52,7 +62,7 @@ func (db *DB) Close() {
 
 func (db *DB) CreateUser(ctx context.Context, user User) error {
 	_, err := db.pool.Exec(ctx,
-		`
+	`
 	INSERT INTO users (email,username,password_hash,last_year_active)
 	VALUES ($1,$2,$3,$4)
 	`,
@@ -63,6 +73,23 @@ func (db *DB) CreateUser(ctx context.Context, user User) error {
 	if errors.As(err, &PgErr) && PgErr.Code == pgerrcode.UniqueViolation {
 		err = apperrors.ErrEmailTaken
 	}
+	return err
+}
+
+func (db *DB) CreatePendingUser(ctx context.Context, user PendingUser) error {
+	_,err := db.pool.Exec(ctx,
+	`
+	INSERT INTO pending_users (email,username,password_hash,token_hash,expires_at)
+	VALUES ($1,$2,$3,$4,$5)
+	ON CONFLICT(email)
+	DO UPDATE SET
+	username = EXCLUDED.username,
+	password_hash = EXCLUDED.password_hash,
+	token_hash = EXCLUDED.token_hash,
+	expires_at = EXCLUDED.expires_at
+	`,
+	user.Email,user.Username,user.PasswordHash,user.TokenHash,user.ExpiresAt,
+	)
 	return err
 }
 

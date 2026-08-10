@@ -1,25 +1,25 @@
 CREATE TABLE IF NOT EXISTS users (
 	id BIGSERIAL PRIMARY KEY,
-	email TEXT UNIQUE,
-	username VARCHAR(20),
-	password_hash TEXT,
-	last_year_active SMALLINT
+	email VARCHAR(300) NOT NULL UNIQUE,
+	username VARCHAR(20) NOT NULL,
+	password_hash TEXT NOT NULL,
+	last_year_active SMALLINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS rooms (
 	id BIGSERIAL PRIMARY KEY,
-	room_name VARCHAR(20)
+	room_name VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS room_users (
 	id BIGSERIAL PRIMARY KEY,
-	room_id BIGINT,
-	user_id BIGINT
+	room_id BIGINT NOT NULL,
+	user_id BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS messages (
 	id BIGSERIAL PRIMARY KEY,
-	user_id BIGINT,
-	room_id BIGINT,
-	message_text TEXT
+	user_id BIGINT NOT NULL,
+	room_id BIGINT NOT NULL,
+	message_text TEXT NOT NULL
 );

@@ -4,6 +4,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"context"
 	"testing"
+	"time"
 )
 
 type UserRow struct {
@@ -12,6 +13,15 @@ type UserRow struct {
 	Username string
 	PasswordHash string
 	LastYearActive int
+}
+
+type PendingUserRow struct {
+	Id int
+	Email string
+	Username string
+	PasswordHash string
+	TokenHash string
+	ExpiresAt time.Time
 }
 
 type TestDB struct {
@@ -57,6 +67,32 @@ func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []UserRow {
 
 }
 
+func (tdb *TestDB) GetPendingUsersByEmail(t *testing.T, email string) []PendingUserRow {
+	t.Helper()
+	rows,err := tdb.pool.Query(context.Background(),
+	`
+		SELECT * FROM pending_users WHERE email = $1
+	`,
+	email)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var users []PendingUserRow
+
+	for rows.Next() {
+		var user PendingUserRow
+		err := rows.Scan(&user.Id,&user.Email,&user.Username,&user.PasswordHash,&user.TokenHash,&user.ExpiresAt)
+		if err != nil {
+			t.Fatal(err)
+		}
+		users = append(users,user)
+	}
+	return users
+
+}
+
+
 func (tdb *TestDB) DeleteUsersByEmail(t *testing.T, email string) {
 	t.Helper()
 	_,err := tdb.pool.Exec(context.Background(),
@@ -68,6 +104,16 @@ func (tdb *TestDB) DeleteUsersByEmail(t *testing.T, email string) {
 	}
 }
 
+func (tdb *TestDB) DeletePendingUsersByEmail(t *testing.T, email string) {
+	t.Helper()
+	_,err := tdb.pool.Exec(context.Background(),
+	`
+	DELETE FROM pending_users WHERE email = $1
+	`,email)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
 	rows,err := tdb.pool.Query(context.Background(),
@@ -88,3 +134,24 @@ func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
 	}
 	return 
 }
+
+func (tdb *TestDB) GetAllRequests(t *testing.T) (users []PendingUserRow) {
+	rows,err := tdb.pool.Query(context.Background(),
+	`
+	SELECT * FROM pending_users
+	`)
+	if err != nil {
+		t.Fatal(err)
+		return 
+	}
+	for rows.Next() {
+		var user PendingUserRow
+		err := rows.Scan(&user.Id,&user.Email,&user.Username,&user.PasswordHash,&user.TokenHash,&user.ExpiresAt)
+		if err != nil {
+			t.Fatal(err)
+		}
+		users = append(users,user)
+	}
+	return 
+}
+

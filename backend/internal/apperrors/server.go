@@ -5,10 +5,12 @@ import (
 )
 
 var ErrInvalidEmail = errors.New("invalid email format")
+var ErrInvalidEmailLength = errors.New("invalid email length")
 var ErrInvalidJSON = errors.New("invalid JSON")
 var ErrInvalidPasswordChars = errors.New("forbidden password characters")
 var ErrInvalidPasswordLength = errors.New("invalid password length")
 var ErrInvalidUsernameLength = errors.New("invalid username length")
+var ErrTokenCreation = errors.New("Failed to create a token")
 
 //error kinds for http responses
 const (
@@ -16,8 +18,10 @@ const (
 	KindErrEmailTaken = "ERR_EMAIL_TAKEN"
 	KindErrDB = "ERR_DB"
 	KindErrInvalidEmail = "ERR_INVALID_EMAIL"
+	KindErrInvalidEmailLength = "ERR_INVALID_EMAIL_LENGTH"
 	KindErrInvalidUsernameLength = "ERR_INVALID_USERNAME_LENGTH"
 	KindErrForbiddenPasswordChars = "ERR_FORBIDDEN_PASSWORD_CHARS"
 	KindErrInvalidPasswordLength = "ERR_INVALID_PASSWORD_LENGTH"
+	KindErrTokenCreation = "ERR_TOKEN_CREATION"
 	KindErrNone = "ERR_NONE"
 )

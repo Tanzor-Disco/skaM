@@ -76,7 +76,7 @@ func validateResponseBody(t *testing.T, resp *http.Response, correct serverRespo
 func checkResponse(t *testing.T, user models.RegisterRequest, correct serverResponseBody, wantedStatus int) {
 	t.Helper()
 	serverRecorder := handleUser(t,user)
-	defer tdb.DeleteUsersByEmail(t,user.Email)
+	defer tdb.DeletePendingUsersByEmail(t,user.Email)
 	serverResp := serverRecorder.Result()
 	checkStatus(t,serverRecorder,wantedStatus)
 	validateResponseBody(t,serverResp,correct)
@@ -102,7 +102,7 @@ func TestHandleRequest_Empty(t *testing.T) {
 	}
 	correct:= newServerResponseBody(false,apperrors.KindErrInvalidEmail)
 	serverRecorder := handleUser(t,user)
-	defer tdb.DeleteUsersByEmail(t, user.Email)
+	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
 	checkStatus(t,serverRecorder,http.StatusBadRequest)
 	validateResponseBody(t,serverResp,correct)
@@ -118,20 +118,34 @@ func TestHandleRequest_InvalidEmail(t *testing.T) {
 	wantedStatus := http.StatusBadRequest
 	checkResponse(t,user,correct,wantedStatus)
 }
+
 func TestHandleRequest_Duplicate(t *testing.T) {
-	user := models.RegisterRequest {
+	userPrev := models.RegisterRequest {
 		Email:    "pidoras_@mail.ru",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
-	correct := newServerResponseBody(false, apperrors.KindErrEmailTaken)
+	user := models.RegisterRequest {
+		Email: "pidoras_@mail.ru",
+		Username: "pidoras_new",
+		Password: "1321313213131",
+	}
+	correct := newServerResponseBody(true, apperrors.KindErrNone)
 	//creating the first user
-	handleUser(t, user)
+	handleUser(t, userPrev)
 	//creating a duplicate
 	serverRecorder := handleUser(t, user)
-	defer tdb.DeleteUsersByEmail(t, user.Email) 
+	queryUsers := tdb.GetPendingUsersByEmail(t,user.Email)
+	if len(queryUsers) != 1 {
+		t.Fatalf("The amount of users with one email is wrong: got %d ,wanted 1",len(queryUsers))
+	}
+	if queryUsers[0].Username == userPrev.Username {
+		t.Fatalf("The username should be replaced by the new one: got %s, wanted %s",queryUsers[0].Username,user.Username)
+	}
+
+	defer tdb.DeletePendingUsersByEmail(t, user.Email) 
 	serverResp := serverRecorder.Result()
-	checkStatus(t, serverRecorder, http.StatusBadRequest)
+	checkStatus(t, serverRecorder, http.StatusOK)
 	validateResponseBody(t, serverResp, correct)
 }
 
