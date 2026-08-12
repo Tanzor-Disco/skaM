@@ -48,7 +48,7 @@ func TestCreateUser_Valid(t *testing.T) {
 		PasswordHash:   "1231231414",
 		LastYearActive: 2026,
 	}
-	err := db.CreateUser(context.Background(),user)
+	err := db.CreateUser(context.Background(), user)
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	AssertError(t, err, false)
 
@@ -71,7 +71,7 @@ func TestCreateUser_Invalid(t *testing.T) {
 		PasswordHash:   "213131321",
 		LastYearActive: 2026,
 	}
-	err := db.CreateUser(context.Background(),user)
+	err := db.CreateUser(context.Background(), user)
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	AssertError(t, err, true)
 }
@@ -83,9 +83,9 @@ func TestCreateUser_Duplicate(t *testing.T) {
 		PasswordHash:   "213131321",
 		LastYearActive: 2026,
 	}
-	err := db.CreateUser(context.Background(),user)
+	err := db.CreateUser(context.Background(), user)
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	AssertError(t, err, false)
-	err = db.CreateUser(context.Background(),user)
+	err = db.CreateUser(context.Background(), user)
 	AssertError(t, err, true)
 }

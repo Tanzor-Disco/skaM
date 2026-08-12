@@ -5,4 +5,3 @@ type RegisterRequest struct {
 	Username string
 	Password string
 }
-

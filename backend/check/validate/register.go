@@ -1,14 +1,14 @@
 package validate
 
 import (
-	"net/mail"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
+	"net/mail"
 )
 
 func validateEmail(address string) error {
-	addr,err := mail.ParseAddress(address)
-	if err == nil  && addr.Address == address {
+	addr, err := mail.ParseAddress(address)
+	if err == nil && addr.Address == address {
 		return nil
 	}
 	if len(address) > 300 {
@@ -18,7 +18,7 @@ func validateEmail(address string) error {
 }
 
 func isLatin(char rune) bool {
-	if (char >= 'a' && char <= 'z') || (char >='A' && char <= 'Z') {
+	if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
 		return true
 	}
 	return false
@@ -32,7 +32,7 @@ func isNumber(char rune) bool {
 }
 
 func checkPasswordFormat(password string) error {
-	for _,char := range password {
+	for _, char := range password {
 		if isLatin(char) || isNumber(char) {
 			continue
 		}
@@ -60,12 +60,12 @@ func validateUsername(username string) error {
 	//database username has type varchar 20 which limits the max length to 30
 	if len(username) >= 0 && len(username) <= 20 {
 		return nil
-	} 
+	}
 	return apperrors.ErrInvalidUsernameLength
 }
 
 func RegisterRequest(request models.RegisterRequest) error {
-	err := validateEmail(request.Email) 
+	err := validateEmail(request.Email)
 	if err != nil {
 		return err
 	}

@@ -2,15 +2,15 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/Tanzor-Disco/skaM/db" 
+	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/models"
 	"log"
 	"net/http"
 )
 
 type server struct {
-	db *db.DB
-	baseURL string
+	db       *db.DB
+	baseURL  string
 	SMTPData models.SMTPData
 }
 
@@ -20,8 +20,8 @@ func newServer(serverData models.ServerData) (*server, error) {
 		return &server{}, err
 	}
 	return &server{
-		db: db,
-		baseURL:serverData.BaseURL,
+		db:       db,
+		baseURL:  serverData.BaseURL,
 		SMTPData: serverData.SMTPData,
 	}, nil
 }
@@ -32,7 +32,7 @@ type serverResponseBody struct {
 }
 
 func newServerResponseBody(success bool, errorKind string) serverResponseBody {
-	return serverResponseBody {
+	return serverResponseBody{
 		Success:   success,
 		ErrorKind: errorKind,
 	}
@@ -60,6 +60,7 @@ func Run(serverData models.ServerData) error {
 	}
 
 	http.HandleFunc("/api/register", server.handleRegister)
+	http.HandleFunc("/api/verify/email/", server.AddUserToMainDB)
 
 	return http.ListenAndServe(":8080", nil)
 }

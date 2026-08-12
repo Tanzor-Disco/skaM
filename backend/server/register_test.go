@@ -75,15 +75,15 @@ func validateResponseBody(t *testing.T, resp *http.Response, correct serverRespo
 
 func checkResponse(t *testing.T, user models.RegisterRequest, correct serverResponseBody, wantedStatus int) {
 	t.Helper()
-	serverRecorder := handleUser(t,user)
-	defer tdb.DeletePendingUsersByEmail(t,user.Email)
+	serverRecorder := handleUser(t, user)
+	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
-	checkStatus(t,serverRecorder,wantedStatus)
-	validateResponseBody(t,serverResp,correct)
+	checkStatus(t, serverRecorder, wantedStatus)
+	validateResponseBody(t, serverResp, correct)
 }
 
 func TestHandleRequest_Valid(t *testing.T) {
-	user := models.RegisterRequest {
+	user := models.RegisterRequest{
 		Email:    "pidoras_@mail.ru",
 		Username: "pidoras",
 		Password: "2313112313",
@@ -91,42 +91,42 @@ func TestHandleRequest_Valid(t *testing.T) {
 
 	correct := newServerResponseBody(true, apperrors.KindErrNone)
 	wantedStatus := http.StatusOK
-	checkResponse(t,user,correct,wantedStatus)
+	checkResponse(t, user, correct, wantedStatus)
 }
 
 func TestHandleRequest_Empty(t *testing.T) {
-	user := models.RegisterRequest {
-		Email:"",
-		Username:"",
+	user := models.RegisterRequest{
+		Email:    "",
+		Username: "",
 		Password: "",
 	}
-	correct:= newServerResponseBody(false,apperrors.KindErrInvalidEmail)
-	serverRecorder := handleUser(t,user)
+	correct := newServerResponseBody(false, apperrors.KindErrInvalidEmail)
+	serverRecorder := handleUser(t, user)
 	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
-	checkStatus(t,serverRecorder,http.StatusBadRequest)
-	validateResponseBody(t,serverResp,correct)
+	checkStatus(t, serverRecorder, http.StatusBadRequest)
+	validateResponseBody(t, serverResp, correct)
 }
 
 func TestHandleRequest_InvalidEmail(t *testing.T) {
-	user := models.RegisterRequest {
-		Email:"huylo",
-		Username:"testname",
+	user := models.RegisterRequest{
+		Email:    "huylo",
+		Username: "testname",
 		Password: "123312123",
 	}
-	correct:= newServerResponseBody(false,apperrors.KindErrInvalidEmail)
+	correct := newServerResponseBody(false, apperrors.KindErrInvalidEmail)
 	wantedStatus := http.StatusBadRequest
-	checkResponse(t,user,correct,wantedStatus)
+	checkResponse(t, user, correct, wantedStatus)
 }
 
 func TestHandleRequest_Duplicate(t *testing.T) {
-	userPrev := models.RegisterRequest {
+	userPrev := models.RegisterRequest{
 		Email:    "pidoras_@mail.ru",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
-	user := models.RegisterRequest {
-		Email: "pidoras_@mail.ru",
+	user := models.RegisterRequest{
+		Email:    "pidoras_@mail.ru",
 		Username: "pidoras_new",
 		Password: "1321313213131",
 	}
@@ -135,49 +135,49 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 	handleUser(t, userPrev)
 	//creating a duplicate
 	serverRecorder := handleUser(t, user)
-	queryUsers := tdb.GetPendingUsersByEmail(t,user.Email)
+	queryUsers := tdb.GetPendingUsersByEmail(t, user.Email)
 	if len(queryUsers) != 1 {
-		t.Fatalf("The amount of users with one email is wrong: got %d ,wanted 1",len(queryUsers))
+		t.Fatalf("The amount of users with one email is wrong: got %d ,wanted 1", len(queryUsers))
 	}
 	if queryUsers[0].Username == userPrev.Username {
-		t.Fatalf("The username should be replaced by the new one: got %s, wanted %s",queryUsers[0].Username,user.Username)
+		t.Fatalf("The username should be replaced by the new one: got %s, wanted %s", queryUsers[0].Username, user.Username)
 	}
 
-	defer tdb.DeletePendingUsersByEmail(t, user.Email) 
+	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
 	checkStatus(t, serverRecorder, http.StatusOK)
 	validateResponseBody(t, serverResp, correct)
 }
 
 func TestHandleRequest_InvalidUsernameLength(t *testing.T) {
-	user := models.RegisterRequest {
-		Email: "example_@mail.ru",
+	user := models.RegisterRequest{
+		Email:    "example_@mail.ru",
 		Username: "125151512515353255151551142144241241",
 		Password: "12321331123",
 	}
-	correct := newServerResponseBody(false,apperrors.KindErrInvalidUsernameLength)
+	correct := newServerResponseBody(false, apperrors.KindErrInvalidUsernameLength)
 	wantedStatus := http.StatusBadRequest
-	checkResponse(t,user,correct,wantedStatus)
+	checkResponse(t, user, correct, wantedStatus)
 }
 
 func TestHandleRequest_InvalidPasswordChars(t *testing.T) {
-	user := models.RegisterRequest {
-		Email: "example@mail.ru",
+	user := models.RegisterRequest{
+		Email:    "example@mail.ru",
 		Username: "huylo",
 		Password: "фывфывфйцуйцуол",
 	}
-	correct := newServerResponseBody(false,apperrors.KindErrForbiddenPasswordChars)
+	correct := newServerResponseBody(false, apperrors.KindErrForbiddenPasswordChars)
 	wantedStatus := http.StatusBadRequest
-	checkResponse(t,user,correct,wantedStatus)
+	checkResponse(t, user, correct, wantedStatus)
 }
 
 func TestHandleRequest_InvalidPasswordLength(t *testing.T) {
-	user := models.RegisterRequest {
-		Email: "example@mail.ru",
+	user := models.RegisterRequest{
+		Email:    "example@mail.ru",
 		Username: "huylo",
 		Password: "12313131331313113131313132131313131313131313131313131313131331313131313131313131313131313",
 	}
-	correct := newServerResponseBody(false,apperrors.KindErrInvalidPasswordLength)
+	correct := newServerResponseBody(false, apperrors.KindErrInvalidPasswordLength)
 	wantedStatus := http.StatusBadRequest
-	checkResponse(t,user,correct,wantedStatus)
+	checkResponse(t, user, correct, wantedStatus)
 }

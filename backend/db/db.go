@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"time"
 	"log"
+	"time"
 )
 
 type User struct {
@@ -18,13 +18,22 @@ type User struct {
 	LastYearActive int
 }
 
+func NewUser(email, username, passwordHash string) User {
+	return User{
+		Email:          email,
+		Username:       username,
+		PasswordHash:   passwordHash,
+		LastYearActive: time.Now().Year(),
+	}
+}
+
 type PendingUser struct {
-	Id int
-	Email string
-	Username string
+	Id           int
+	Email        string
+	Username     string
 	PasswordHash string
-	TokenHash string
-	ExpiresAt time.Time
+	TokenHash    string
+	ExpiresAt    time.Time
 }
 
 type Room struct {
@@ -62,7 +71,7 @@ func (db *DB) Close() {
 
 func (db *DB) CreateUser(ctx context.Context, user User) error {
 	_, err := db.pool.Exec(ctx,
-	`
+		`
 	INSERT INTO users (email,username,password_hash,last_year_active)
 	VALUES ($1,$2,$3,$4)
 	`,
@@ -77,8 +86,8 @@ func (db *DB) CreateUser(ctx context.Context, user User) error {
 }
 
 func (db *DB) CreatePendingUser(ctx context.Context, user PendingUser) error {
-	_,err := db.pool.Exec(ctx,
-	`
+	_, err := db.pool.Exec(ctx,
+		`
 	INSERT INTO pending_users (email,username,password_hash,token_hash,expires_at)
 	VALUES ($1,$2,$3,$4,$5)
 	ON CONFLICT(email)
@@ -88,7 +97,7 @@ func (db *DB) CreatePendingUser(ctx context.Context, user PendingUser) error {
 	token_hash = EXCLUDED.token_hash,
 	expires_at = EXCLUDED.expires_at
 	`,
-	user.Email,user.Username,user.PasswordHash,user.TokenHash,user.ExpiresAt,
+		user.Email, user.Username, user.PasswordHash, user.TokenHash, user.ExpiresAt,
 	)
 	return err
 }
@@ -145,4 +154,14 @@ func (db *DB) GetUsers() ([]User, error) {
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (PendingUser, error) {
+	var user PendingUser
+	err := db.pool.QueryRow(ctx,
+		`
+	SELECT * FROM pending_users WHERE token_hash=$1
+	`,
+		tokenHash).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.TokenHash, &user.ExpiresAt)
+	return user, err
 }

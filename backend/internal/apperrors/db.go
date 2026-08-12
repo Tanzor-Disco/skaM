@@ -5,4 +5,3 @@ import (
 )
 
 var ErrEmailTaken = errors.New("Error: email is already taken")
-

@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/Tanzor-Disco/skaM/server"
 	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server"
 
 	"github.com/lpernett/godotenv"
 )
@@ -15,7 +15,7 @@ import (
 const migrationsSource = "file://db/migrations"
 
 func main() {
-	//Load .env 
+	//Load .env
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatal(err)
 	}
@@ -28,15 +28,15 @@ func main() {
 	SMTPHost := os.Getenv("SMTP_HOST")
 	SMTPAddr := os.Getenv("SMTP_ADDRESS")
 	SMTPFrom := os.Getenv("SMTP_FROM")
-	
+
 	//Update migrations
-	err := migrations.Update(migrationsSource,URI)
+	err := migrations.Update(migrationsSource, URI)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Run the server
-	SMTPData := models.NewSMTPData(SMTPUsername,SMTPPassword,SMTPHost,SMTPAddr,SMTPFrom)
-	serverData := models.NewServerData(URI,baseURL,SMTPData)
+	SMTPData := models.NewSMTPData(SMTPUsername, SMTPPassword, SMTPHost, SMTPAddr, SMTPFrom)
+	serverData := models.NewServerData(URI, baseURL, SMTPData)
 	log.Fatal(server.Run(serverData))
 }
