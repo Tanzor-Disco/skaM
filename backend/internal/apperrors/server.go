@@ -23,5 +23,6 @@ const (
 	KindErrForbiddenPasswordChars = "ERR_FORBIDDEN_PASSWORD_CHARS"
 	KindErrInvalidPasswordLength = "ERR_INVALID_PASSWORD_LENGTH"
 	KindErrTokenCreation = "ERR_TOKEN_CREATION"
+	KindErrSendingEmail = "ERR_SENDING_EMAIL"
 	KindErrNone = "ERR_NONE"
 )

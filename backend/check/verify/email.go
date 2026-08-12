@@ -5,6 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	_ "embed"
+	"text/template"
+	"bytes"
+	"github.com/Tanzor-Disco/skaM/models"
+	"net/smtp"
+	"log"
 )
 
 func CreateToken() (string,string,error) {
@@ -22,3 +28,38 @@ func CreateToken() (string,string,error) {
 	return token,tokenHashed,nil
 }
 
+//go:embed templates/body.html
+var bodyEmbed string
+
+func getEmailBody(baseURL string, token string) (string, error){
+	var body string
+	template,err := template.New("body").Parse(bodyEmbed)
+	if err != nil {
+		return body, err
+	}
+	apiDest := baseURL + "/api/verify/email?token=" + token
+	var buf bytes.Buffer
+	err = template.Execute(&buf,apiDest)
+	if err != nil {
+		return body,err
+	}
+	body = buf.String()
+	return body,nil
+}
+
+func SendEmail(baseURL, token, to string, data models.SMTPData) error {
+	auth := smtp.PlainAuth("",data.Username,data.Password,data.Host)
+	body,err := getEmailBody(baseURL,token)
+	if err != nil {
+		return err
+	}
+	log.Println(data.From)
+	msg := []byte(
+	"To: " + to + "\r\n" + 
+	"Subject: Validate skaM Registration\r\n" + 
+	"MIME-Version: 1.0\r\n" +	
+	"Content-Type: text/html; charset=UTF-8\r\n" + "\r\n" +
+	body)
+	err = smtp.SendMail(data.Addr,auth,data.From,[]string{to},msg)
+	return err
+}

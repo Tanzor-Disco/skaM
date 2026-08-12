@@ -2,43 +2,41 @@ package main
 
 import (
 	// "github.com/Tanzor-Disco/skaM/db"
-	"errors"
 	"log"
 	"os"
 
 	"github.com/Tanzor-Disco/skaM/server"
 	"github.com/Tanzor-Disco/skaM/db/migrations"
+	"github.com/Tanzor-Disco/skaM/models"
+
 	"github.com/lpernett/godotenv"
 )
 
-func getURI() (string, error) {
-	options := []string{
-		".env",
-		"../.env",
-	}
-	for _, option := range options {
-		err := godotenv.Load(option)
-		if err == nil {
-			URI := os.Getenv("URI")
-			return URI, nil
-		}
-	}
-	return "", errors.New("Didn't find a .env file")
-}
-
-var migrationsSource = "file://db/migrations"
+const migrationsSource = "file://db/migrations"
 
 func main() {
+	//Load .env 
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal(err)
+	}
+
+	//Load .env variables
+	URI := os.Getenv("URI")
+	baseURL := os.Getenv("BASE_URL")
+	SMTPUsername := os.Getenv("SMTP_USERNAME")
+	SMTPPassword := os.Getenv("SMTP_PASSWORD")
+	SMTPHost := os.Getenv("SMTP_HOST")
+	SMTPAddr := os.Getenv("SMTP_ADDRESS")
+	SMTPFrom := os.Getenv("SMTP_FROM")
 	
-	URI, err := getURI()
+	//Update migrations
+	err := migrations.Update(migrationsSource,URI)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = migrations.Update(migrationsSource,URI)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Fatal(server.Run(URI))
+	//Run the server
+	SMTPData := models.NewSMTPData(SMTPUsername,SMTPPassword,SMTPHost,SMTPAddr,SMTPFrom)
+	serverData := models.NewServerData(URI,baseURL,SMTPData)
+	log.Fatal(server.Run(serverData))
 }

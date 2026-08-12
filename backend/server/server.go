@@ -2,22 +2,27 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/Tanzor-Disco/skaM/db"
+	"github.com/Tanzor-Disco/skaM/db" 
+	"github.com/Tanzor-Disco/skaM/models"
 	"log"
 	"net/http"
 )
 
 type server struct {
 	db *db.DB
+	baseURL string
+	SMTPData models.SMTPData
 }
 
-func newServer(URI string) (*server, error) {
-	db, err := db.Connect(URI)
+func newServer(serverData models.ServerData) (*server, error) {
+	db, err := db.Connect(serverData.URI)
 	if err != nil {
 		return &server{}, err
 	}
 	return &server{
 		db: db,
+		baseURL:serverData.BaseURL,
+		SMTPData: serverData.SMTPData,
 	}, nil
 }
 
@@ -48,8 +53,8 @@ func sendJSON(w http.ResponseWriter, code int, body serverResponseBody) {
 
 }
 
-func Run(URI string) error {
-	server, err := newServer(URI)
+func Run(serverData models.ServerData) error {
+	server, err := newServer(serverData)
 	if err != nil {
 		return err
 	}

@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
+	"net/http" 
 	"time"
+	"log"
 
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
@@ -13,7 +14,6 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/Tanzor-Disco/skaM/check/verify"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
 
@@ -42,7 +42,7 @@ func getUserDataErrorBody(err error) serverResponseBody {
 	return body
 }
 
-func (s *server) registerUser(ctx context.Context, userDB db.PendingUser) error {
+func (s *server) registerPendingUser(ctx context.Context, userDB db.PendingUser) error {
 	err := s.db.CreatePendingUser(ctx,userDB)
 	return err
 }
@@ -52,7 +52,6 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	currUser, err := getUserData(req)
 	if err != nil {
 		body := getUserDataErrorBody(err)
-		log.Printf("handleRegister error: %v",err)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
@@ -67,7 +66,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 
 	expiresAt := time.Now().Add(time.Hour)
 	//TODO: add a function that sends a letter to the user and uses the token; change _ for token
-	_, tokenHash,err := verify.CreateToken()
+	token, tokenHash,err := verify.CreateToken()
 	if err != nil {
 		body := newServerResponseBody(false, apperrors.KindErrTokenCreation)
 		log.Printf("handleRegister error: %v",err)
@@ -80,7 +79,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		PasswordHash:   string(passwordHash),
 		ExpiresAt: expiresAt,
 	}
-	err = s.registerUser(ctx,pendingUserDB)
+	err = s.registerPendingUser(ctx,pendingUserDB)
 	if err != nil {
 		var body serverResponseBody
 		if errors.Is(err, apperrors.ErrEmailTaken) {
@@ -95,7 +94,15 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
-
+	
+	err = verify.SendEmail(s.baseURL,token,currUser.Email,s.SMTPData)
+	if err != nil {
+		body := newServerResponseBody(false,apperrors.KindErrSendingEmail)
+		log.Printf("handleRegister error: %v",err)
+		sendJSON(w,http.StatusInternalServerError,body)
+		return 
+	}
+	
 	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)
 
