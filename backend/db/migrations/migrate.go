@@ -4,10 +4,20 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"embed"
+	"errors"
 )
 
-func Update(sourceURL string, databaseURL string) error {
-	m, err := migrate.New(sourceURL, databaseURL)
+//go:embed *.sql
+var migrations embed.FS
+
+func Update(databaseURL string) error {
+	source,err := iofs.New(migrations,".")
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithSourceInstance("iofs",source,databaseURL)
 	if err != nil {
 		return err
 	}
@@ -17,11 +27,22 @@ func Update(sourceURL string, databaseURL string) error {
 	return nil
 }
 
-func Reset(sourceURL string, databaseURL string) error {
-	m, err := migrate.New(sourceURL, databaseURL)
+func Reset(databaseURL string) error {
+	source,err := iofs.New(migrations,".")
+	m, err := migrate.NewWithSourceInstance("iofs", source, databaseURL)
 	if err != nil {
 		return err
 	}
+
+	_,_,err = m.Version()
+	if err != nil {
+		if errors.Is(err,migrate.ErrNilVersion) {
+			m.Up()
+			return nil
+		}
+		return err
+	}
+	
 	err = m.Drop()
 	if err != nil {
 		return err

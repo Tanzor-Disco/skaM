@@ -62,5 +62,7 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/register", server.handleRegister)
 	http.HandleFunc("/api/verify/email/", server.AddUserToMainDB)
 
+	log.Println(server.db.GetUsers()) //delete
+
 	return http.ListenAndServe(":8080", nil)
 }

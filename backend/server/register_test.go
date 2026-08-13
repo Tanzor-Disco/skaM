@@ -13,6 +13,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/lpernett/godotenv"
 )
 
@@ -25,7 +26,10 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	TestURI := os.Getenv("TEST_URI")
+	testURI := os.Getenv("TEST_URI")
+
+	//reset the db and update to the latest migration
+	migrations.Reset(testURI)
 
 	//run SMTP server (requires mailpit application)
 	cmd := exec.Command("mailpit")
@@ -36,14 +40,14 @@ func TestMain(m *testing.M) {
 	//create Server Data
 	TestSMTPData := models.NewSMTPData("","","localhost","localhost:1025","test@example.com")
 	TestBaseURL := "http://localhost:8080"
-	TestServerData := models.NewServerData(TestURI,TestBaseURL,TestSMTPData)
+	TestServerData := models.NewServerData(testURI,TestBaseURL,TestSMTPData)
 	srv, err = newServer(TestServerData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//connect to db
-	tdb, err = testutils.Connect(TestURI)
+	tdb, err = testutils.Connect(testURI)
 	if err != nil {
 		log.Fatal(err)
 	}

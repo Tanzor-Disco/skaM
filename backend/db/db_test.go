@@ -10,6 +10,7 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/db/migrations"
 
 	"github.com/lpernett/godotenv"
 )
@@ -18,19 +19,29 @@ var db *DB
 var tdb *testutils.TestDB
 
 func TestMain(m *testing.M) {
+	//load the environment
 	err := godotenv.Load("../.env_test")
 	if err != nil {
 		log.Fatal(err)
 	}
-	URI := os.Getenv("TEST_URI")
-	db, err = Connect(URI)
+	testURI := os.Getenv("TEST_URI")
+
+	//reset the test db and update to the latest migration
+	migrations.Reset(testURI)
+	
+	//connect the main db
+	db, err = Connect(testURI)
 	if err != nil {
 		log.Fatal(err)
 	}
-	tdb, err = testutils.Connect(URI)
+
+	//connect the testdb
+	tdb, err = testutils.Connect(testURI)
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	//run the tests
 	code := m.Run()
 	db.pool.Close()
 	tdb.Close()

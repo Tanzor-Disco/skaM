@@ -12,8 +12,6 @@ import (
 	"github.com/lpernett/godotenv"
 )
 
-const migrationsSource = "file://db/migrations"
-
 func main() {
 	//Load .env
 	if err := godotenv.Load(".env"); err != nil {
@@ -30,7 +28,7 @@ func main() {
 	SMTPFrom := os.Getenv("SMTP_FROM")
 
 	//Update migrations
-	err := migrations.Update(migrationsSource, URI)
+	err := migrations.Update(URI)
 	if err != nil {
 		log.Fatal(err)
 	}
