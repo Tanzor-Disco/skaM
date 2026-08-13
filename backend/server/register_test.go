@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"os/exec"
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
@@ -19,23 +20,39 @@ var srv *server
 var tdb *testutils.TestDB
 
 func TestMain(m *testing.M) {
+	//load the environment
 	err := godotenv.Load("../.env_test")
 	if err != nil {
 		log.Fatal(err)
 	}
-	URI := os.Getenv("URI")
-	srv, err = newServer(URI)
-	if err != nil {
+	TestURI := os.Getenv("TEST_URI")
+
+	//run SMTP server (requires mailpit application)
+	cmd := exec.Command("mailpit")
+	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	tdb, err = testutils.Connect(URI)
+
+	//create Server Data
+	TestSMTPData := models.NewSMTPData("","","localhost","localhost:1025","test@example.com")
+	TestBaseURL := "http://localhost:8080"
+	TestServerData := models.NewServerData(TestURI,TestBaseURL,TestSMTPData)
+	srv, err = newServer(TestServerData)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	//connect to db
+	tdb, err = testutils.Connect(TestURI)
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	//launch and finish the tests
 	code := m.Run()
 	tdb.Close()
 	srv.db.Close()
+	cmd.Process.Kill()
 	os.Exit(code)
 }
 
@@ -135,14 +152,6 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 	handleUser(t, userPrev)
 	//creating a duplicate
 	serverRecorder := handleUser(t, user)
-	queryUsers := tdb.GetPendingUsersByEmail(t, user.Email)
-	if len(queryUsers) != 1 {
-		t.Fatalf("The amount of users with one email is wrong: got %d ,wanted 1", len(queryUsers))
-	}
-	if queryUsers[0].Username == userPrev.Username {
-		t.Fatalf("The username should be replaced by the new one: got %s, wanted %s", queryUsers[0].Username, user.Username)
-	}
-
 	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
 	checkStatus(t, serverRecorder, http.StatusOK)

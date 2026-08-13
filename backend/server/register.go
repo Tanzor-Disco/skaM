@@ -12,7 +12,6 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/check/validate"
 	"github.com/Tanzor-Disco/skaM/check/verify"
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
 	"golang.org/x/crypto/bcrypt"
@@ -42,7 +41,7 @@ func getUserDataErrorBody(err error) serverResponseBody {
 	return body
 }
 
-func (s *server) registerPendingUser(ctx context.Context, userDB db.PendingUser) error {
+func (s *server) registerPendingUser(ctx context.Context, userDB models.PendingUser) error {
 	err := s.db.CreatePendingUser(ctx, userDB)
 	return err
 }
@@ -71,7 +70,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		log.Printf("handleRegister error: %v", err)
 		sendJSON(w, http.StatusInternalServerError, body)
 	}
-	pendingUserDB := db.PendingUser{
+	pendingUserDB := models.PendingUser{
 		Email:        currUser.Email,
 		Username:     currUser.Username,
 		TokenHash:    tokenHash,
@@ -116,7 +115,7 @@ func (s *server) AddUserToMainDB(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Printf("error in AddUserToMain: %v", err)
 	}
-	userDB := db.NewUser(user.Email, user.Username, user.PasswordHash)
+	userDB := models.NewUser(user.Email, user.Username, user.PasswordHash)
 	err = s.db.CreateUser(ctx, userDB)
 	if err != nil {
 		log.Printf("error in AddUserToMain: %v", err)

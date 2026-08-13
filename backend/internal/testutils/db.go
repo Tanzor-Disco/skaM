@@ -4,25 +4,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"testing"
-	"time"
+	"github.com/Tanzor-Disco/skaM/models"
 )
-
-type UserRow struct {
-	Id             int
-	Email          string
-	Username       string
-	PasswordHash   string
-	LastYearActive int
-}
-
-type PendingUserRow struct {
-	Id           int
-	Email        string
-	Username     string
-	PasswordHash string
-	TokenHash    string
-	ExpiresAt    time.Time
-}
 
 type TestDB struct {
 	pool *pgxpool.Pool
@@ -42,7 +25,7 @@ func (tdb *TestDB) Close() {
 	tdb.pool.Close()
 }
 
-func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []UserRow {
+func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []models.User {
 	t.Helper()
 	rows, err := tdb.pool.Query(context.Background(),
 		`
@@ -53,11 +36,12 @@ func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []UserRow {
 		t.Fatal(err)
 	}
 
-	var users []UserRow
+	var users []models.User
 
 	for rows.Next() {
-		var user UserRow
-		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+		var user models.User
+		var id int
+		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -67,7 +51,7 @@ func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []UserRow {
 
 }
 
-func (tdb *TestDB) GetPendingUsersByEmail(t *testing.T, email string) []PendingUserRow {
+func (tdb *TestDB) GetPendingUserByEmail(t *testing.T, email string) models.PendingUser {
 	t.Helper()
 	rows, err := tdb.pool.Query(context.Background(),
 		`
@@ -78,17 +62,20 @@ func (tdb *TestDB) GetPendingUsersByEmail(t *testing.T, email string) []PendingU
 		t.Fatal(err)
 	}
 
-	var users []PendingUserRow
+	var users []models.PendingUser
 
 	for rows.Next() {
-		var user PendingUserRow
+		var user models.PendingUser
 		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.TokenHash, &user.ExpiresAt)
 		if err != nil {
 			t.Fatal(err)
 		}
 		users = append(users, user)
 	}
-	return users
+	if len(users) != 1 {
+		t.Fatalf("the amount of found users doesn't equal to one: %+v",users)
+	}
+	return users[0]
 
 }
 
@@ -114,7 +101,7 @@ func (tdb *TestDB) DeletePendingUsersByEmail(t *testing.T, email string) {
 	}
 }
 
-func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
+func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []models.User) {
 	rows, err := tdb.pool.Query(context.Background(),
 		`
 	SELECT * FROM users
@@ -124,8 +111,9 @@ func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
 		return
 	}
 	for rows.Next() {
-		var user UserRow
-		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+		var user models.User
+		var id int
+		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -134,7 +122,7 @@ func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []UserRow) {
 	return
 }
 
-func (tdb *TestDB) GetAllRequests(t *testing.T) (users []PendingUserRow) {
+func (tdb *TestDB) GetAllRequests(t *testing.T) (users []models.PendingUser) {
 	rows, err := tdb.pool.Query(context.Background(),
 		`
 	SELECT * FROM pending_users
@@ -144,7 +132,7 @@ func (tdb *TestDB) GetAllRequests(t *testing.T) (users []PendingUserRow) {
 		return
 	}
 	for rows.Next() {
-		var user PendingUserRow
+		var user models.PendingUser
 		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.TokenHash, &user.ExpiresAt)
 		if err != nil {
 			t.Fatal(err)
@@ -153,3 +141,4 @@ func (tdb *TestDB) GetAllRequests(t *testing.T) (users []PendingUserRow) {
 	}
 	return
 }
+

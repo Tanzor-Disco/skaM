@@ -4,37 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
-	"time"
 )
 
-type User struct {
-	Email          string
-	Username       string
-	PasswordHash   string
-	LastYearActive int
-}
-
-func NewUser(email, username, passwordHash string) User {
-	return User{
-		Email:          email,
-		Username:       username,
-		PasswordHash:   passwordHash,
-		LastYearActive: time.Now().Year(),
-	}
-}
-
-type PendingUser struct {
-	Id           int
-	Email        string
-	Username     string
-	PasswordHash string
-	TokenHash    string
-	ExpiresAt    time.Time
-}
 
 type Room struct {
 	Name string
@@ -69,7 +45,7 @@ func (db *DB) Close() {
 	db.pool.Close()
 }
 
-func (db *DB) CreateUser(ctx context.Context, user User) error {
+func (db *DB) CreateUser(ctx context.Context, user models.User) error {
 	_, err := db.pool.Exec(ctx,
 		`
 	INSERT INTO users (email,username,password_hash,last_year_active)
@@ -85,7 +61,7 @@ func (db *DB) CreateUser(ctx context.Context, user User) error {
 	return err
 }
 
-func (db *DB) CreatePendingUser(ctx context.Context, user PendingUser) error {
+func (db *DB) CreatePendingUser(ctx context.Context, user models.PendingUser) error {
 	_, err := db.pool.Exec(ctx,
 		`
 	INSERT INTO pending_users (email,username,password_hash,token_hash,expires_at)
@@ -135,18 +111,18 @@ func (db *DB) AddUserToRoom(ctx context.Context, roomUser RoomUser) error {
 	return err
 }
 
-func (db *DB) GetUsers() ([]User, error) {
+func (db *DB) GetUsers() ([]models.User, error) {
 	rows, err := db.pool.Query(context.Background(), `
 	SELECT * FROM users
 	`)
 	if err != nil {
-		return make([]User, 0), err
+		return make([]models.User, 0), err
 	}
 	defer rows.Close()
-	var users []User
+	var users []models.User
 	var id int
 	for rows.Next() {
-		var user User
+		var user models.User
 		if err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive); err != nil {
 			log.Println(err)
 			continue
@@ -156,8 +132,8 @@ func (db *DB) GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (PendingUser, error) {
-	var user PendingUser
+func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (models.PendingUser, error) {
+	var user models.PendingUser
 	err := db.pool.QueryRow(ctx,
 		`
 	SELECT * FROM pending_users WHERE token_hash=$1
