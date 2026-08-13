@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
+	"time"
 )
 
 
@@ -140,4 +141,26 @@ func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (
 	`,
 		tokenHash).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.TokenHash, &user.ExpiresAt)
 	return user, err
+}
+
+func (db *DB) deleteExpired() error {
+	_,err := db.pool.Exec(context.Background(),
+	`
+	Delete from pending_users WHERE expires_at < CURRENT_TIMESTAMP
+	`,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) PeriodicPendingDelete() {
+	for {
+		err := db.deleteExpired()
+		if err != nil {
+			log.Printf("failed to delete expired users from pending: %v",err)
+		}
+		time.Sleep(1 * time.Hour)
+	}
 }
