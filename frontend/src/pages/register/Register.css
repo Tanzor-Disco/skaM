@@ -1,6 +1,8 @@
-.page-center {
+.page-register {
     display: flex;
     flex-direction: column;
+	align-items: center;
+	height:80vh;
 }
 
 .site-logo {

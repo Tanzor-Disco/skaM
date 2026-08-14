@@ -105,17 +105,17 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = verify.SendEmail(s.baseURL, token, currUser.Email, s.SMTPData)
-	if err != nil {
-		body := newServerResponseBody(false, apperrors.KindErrSendingEmail)
-		log.Printf("handleRegister error: %v", err)
-		sendJSON(w, http.StatusInternalServerError, body)
-		return
-	}
-
 	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)
-
+	
+	go func() {
+		err := verify.SendEmail(s.baseURL, token, currUser.Email, s.SMTPData)
+		if err != nil {
+			log.Printf("handleRegister error: %v", err)
+		}
+	}()
+	
+	
 }
 
 func (s *server) AddUserToMainDB(w http.ResponseWriter, req *http.Request) {
@@ -131,5 +131,6 @@ func (s *server) AddUserToMainDB(w http.ResponseWriter, req *http.Request) {
 	err = s.db.CreateUser(ctx, userDB)
 	if err != nil {
 		log.Printf("error in AddUserToMain: %v", err)
-	}
+	} 
+	http.Redirect(w, req, "/login", http.StatusSeeOther)
 }

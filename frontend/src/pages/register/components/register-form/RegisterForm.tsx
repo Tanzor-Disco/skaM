@@ -1,14 +1,17 @@
 import './RegisterForm.css'
 import FormField from "./components/FormField"
 import {useState} from "react"
-import type {submitEvent, SyntheticEvent} from "react"
+import type {Dispatch,SetStateAction,SyntheticEvent} from "react"
 
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+	setRegisterComplete:Dispatch<SetStateAction<boolean>>
+}
+
+export default function RegisterForm({setRegisterComplete}:RegisterFormProps) {
 	const [emailErr,setEmailErr] = useState("")
 	const [usernameErr,setUsernameErr] = useState("")
 	const [passwordErr,setPasswordErr] = useState("")
-
 
 	function toggleState(errorKind:string) {
 		switch (errorKind) {
@@ -51,6 +54,7 @@ export default function RegisterForm() {
 			toggleState(responseObj.error_kind)
 			return
 		}
+		setRegisterComplete(true)
 	}
 	
     return (
