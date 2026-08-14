@@ -1,7 +1,7 @@
 import './RegisterForm.css'
-import InputField from '@/components/input-field/InputField'
 import FormField from "./components/FormField"
 import {useState} from "react"
+import type {submitEvent, SyntheticEvent} from "react"
 
 
 export default function RegisterForm() {
@@ -30,8 +30,12 @@ export default function RegisterForm() {
 		setUsernameErr("")
 	}
 
-	async function handleSubmit(formData:FormData) {
+	async function handleSubmit(event:SyntheticEvent<HTMLFormElement>) {
+		event.preventDefault()
+		const form = event.currentTarget
+		const formData = new FormData(form)
 		const objData = Object.fromEntries(formData)
+		form.reset()
 		const response = await fetch("/api/register", {
 			method:"POST",
 			headers: {
@@ -42,6 +46,7 @@ export default function RegisterForm() {
 
 		if (!response.ok) {
 			const responseObj = await response.json()
+			console.log(responseObj)
 			toggleAllOff()
 			toggleState(responseObj.error_kind)
 			return
@@ -49,7 +54,7 @@ export default function RegisterForm() {
 	}
 	
     return (
-        <form className="register-form" action={handleSubmit}>
+        <form className="register-form" onSubmit={handleSubmit}>
 			<FormField 
 			warning={emailErr} 
 			fieldName={"Email"} 

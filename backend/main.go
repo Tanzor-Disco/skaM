@@ -27,7 +27,7 @@ func main() {
 	SMTPAddr := os.Getenv("SMTP_ADDRESS")
 	SMTPFrom := os.Getenv("SMTP_FROM")
 
-	//Update migrations
+	//Update migrations 	
 	err := migrations.Update(URI)
 	if err != nil {
 		log.Fatal(err)

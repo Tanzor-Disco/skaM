@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 	"os/exec"
+	"context"
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
@@ -159,6 +160,28 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 	defer tdb.DeletePendingUsersByEmail(t, user.Email)
 	serverResp := serverRecorder.Result()
 	checkStatus(t, serverRecorder, http.StatusOK)
+	validateResponseBody(t, serverResp, correct)
+}
+
+func TestHandleRequest_EmailTaken(t *testing.T) {
+	userRequest := models.RegisterRequest {
+		Email:    "pidoras_@mail.ru", 
+		Username: "pidoras_new", 
+		Password: "1321313213131",
+	}
+	user := models.User {
+		Email:    "pidoras_@mail.ru", 	
+		Username: "pidoras_new",      
+       	PasswordHash: "1321313213131",
+		LastYearActive: 2026,
+	}
+	srv.db.CreateUser(context.Background(),user)
+	defer tdb.DeleteUsersByEmail(t,user.Email)
+	correct := newServerResponseBody(false,apperrors.KindErrEmailTaken)
+	serverRecorder := handleUser(t,userRequest)
+	defer tdb.DeletePendingUsersByEmail(t,userRequest.Email)
+	serverResp := serverRecorder.Result()
+	checkStatus(t,serverRecorder,http.StatusBadRequest)
 	validateResponseBody(t, serverResp, correct)
 }
 

@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -17,10 +16,29 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func getUserData(request *http.Request) (models.RegisterRequest, error) {
+func (s *server) checkEmailTaken(email string) error {
+	users,err := s.db.GetUsersByEmail(email)
+	if err != nil {
+		log.Printf("couldn't get users by email: %v",err)
+	}
+	if len(users) > 0 {
+		return apperrors.ErrEmailTaken
+	}
+	return nil
+}
+
+
+func (s *server) getUserData(request *http.Request) (models.RegisterRequest, error) {
 	var currUser models.RegisterRequest
 	err := json.NewDecoder(request.Body).Decode(&currUser)
+	if err != nil {
+		log.Printf("couldn't decode request body: %v",err)
+	}
 	err = validate.RegisterRequest(currUser)
+	if err != nil {
+		return currUser,err
+	}
+	err = s.checkEmailTaken(currUser.Email)
 	return currUser, err
 }
 
@@ -37,6 +55,8 @@ func getUserDataErrorBody(err error) serverResponseBody {
 		body = newServerResponseBody(false, apperrors.KindErrForbiddenPasswordChars)
 	case apperrors.ErrInvalidPasswordLength:
 		body = newServerResponseBody(false, apperrors.KindErrInvalidPasswordLength)
+	case apperrors.ErrEmailTaken:
+		body = newServerResponseBody(false,apperrors.KindErrEmailTaken)
 	}
 	return body
 }
@@ -48,7 +68,7 @@ func (s *server) registerPendingUser(ctx context.Context, userDB models.PendingU
 
 func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	currUser, err := getUserData(req)
+	currUser, err := s.getUserData(req)
 	if err != nil {
 		body := getUserDataErrorBody(err)
 		sendJSON(w, http.StatusBadRequest, body)
@@ -79,15 +99,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	}
 	err = s.registerPendingUser(ctx, pendingUserDB)
 	if err != nil {
-		var body serverResponseBody
-		if errors.Is(err, apperrors.ErrEmailTaken) {
-			body = newServerResponseBody(false, apperrors.KindErrEmailTaken)
-			log.Printf("handleRegister error: %v", err)
-			sendJSON(w, http.StatusBadRequest, body)
-			return
-		}
-
-		body = newServerResponseBody(false, apperrors.KindErrDB)
+		body := newServerResponseBody(false, apperrors.KindErrDB)
 		log.Printf("handleRegister error: %v", err)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return

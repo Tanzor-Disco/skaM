@@ -133,6 +133,29 @@ func (db *DB) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
+func (db *DB) GetUsersByEmail(email string) ([]models.User,error){
+	rows, err := db.pool.Query(context.Background(),
+		`
+		SELECT * FROM users WHERE email = $1
+		`,
+		email)
+	var users []models.User
+	if err != nil {
+		return users,err
+	}
+
+	for rows.Next() {
+		var user models.User
+		var id int
+		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+		if err != nil {
+			return users,err
+		}
+		users = append(users, user)
+	}
+	return users,nil
+}
+
 func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (models.PendingUser, error) {
 	var user models.PendingUser
 	err := db.pool.QueryRow(ctx,

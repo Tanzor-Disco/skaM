@@ -6,7 +6,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"embed"
-	"errors"
 )
 
 //go:embed *.sql
@@ -34,17 +33,8 @@ func Reset(databaseURL string) error {
 		return err
 	}
 
-	_,_,err = m.Version()
-	if err != nil {
-		if errors.Is(err,migrate.ErrNilVersion) {
-			m.Up()
-			return nil
-		}
-		return err
-	}
-	
-	err = m.Drop()
-	if err != nil {
+	err = m.Down()
+	if err != nil && err != migrate.ErrNoChange {
 		return err
 	}
 	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
