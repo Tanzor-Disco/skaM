@@ -60,7 +60,8 @@ func Run(serverData models.ServerData) error {
 	}
 
 	http.HandleFunc("/api/register", server.handleRegister)
-	http.HandleFunc("/api/verify/email/", server.AddUserToMainDB)
+	http.HandleFunc("/api/verify/email/", server.addUserToMainDB)
+	http.HandleFunc("/api/login", server.handleLogin)
 
 	go server.db.PeriodicPendingDelete()
 

@@ -17,14 +17,16 @@ import (
 )
 
 func (s *server) checkEmailTaken(email string) error {
-	users,err := s.db.GetUsersByEmail(email)
+	_,err := s.db.GetUserByEmail(email)
+	if err == apperrors.ErrUserNotFound {
+		return nil
+	}
 	if err != nil {
-		log.Printf("couldn't get users by email: %v",err)
+		log.Printf("couldn't get user by email: %v",err)
+		return apperrors.ErrDB
 	}
-	if len(users) > 0 {
-		return apperrors.ErrEmailTaken
-	}
-	return nil
+
+	return apperrors.ErrEmailTaken
 }
 
 
@@ -57,6 +59,8 @@ func getUserDataErrorBody(err error) serverResponseBody {
 		body = newServerResponseBody(false, apperrors.KindErrInvalidPasswordLength)
 	case apperrors.ErrEmailTaken:
 		body = newServerResponseBody(false,apperrors.KindErrEmailTaken)
+	case apperrors.ErrDB:
+		body = newServerResponseBody(false,apperrors.KindErrDB)
 	}
 	return body
 }
@@ -118,7 +122,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	
 }
 
-func (s *server) AddUserToMainDB(w http.ResponseWriter, req *http.Request) {
+func (s *server) addUserToMainDB(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	token := req.URL.Query().Get("token")
 	sum := sha256.Sum256([]byte(token))

@@ -3,13 +3,15 @@ package db
 import (
 	"context"
 	"errors"
+	"log"
+	"time"
+
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log"
-	"time"
 )
 
 
@@ -73,9 +75,7 @@ func (db *DB) CreatePendingUser(ctx context.Context, user models.PendingUser) er
 	password_hash = EXCLUDED.password_hash,
 	token_hash = EXCLUDED.token_hash,
 	expires_at = EXCLUDED.expires_at
-	`,
-		user.Email, user.Username, user.PasswordHash, user.TokenHash, user.ExpiresAt,
-	)
+	`, user.Email, user.Username, user.PasswordHash, user.TokenHash, user.ExpiresAt,)
 	return err
 }
 
@@ -133,27 +133,18 @@ func (db *DB) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (db *DB) GetUsersByEmail(email string) ([]models.User,error){
-	rows, err := db.pool.Query(context.Background(),
+func (db *DB) GetUserByEmail(email string) (models.User,error){
+	var id int
+	var user models.User
+	err := db.pool.QueryRow(context.Background(),
 		`
 		SELECT * FROM users WHERE email = $1
 		`,
-		email)
-	var users []models.User
-	if err != nil {
-		return users,err
+		email).Scan(&id,&user.Email,&user.Username,&user.PasswordHash,&user.LastYearActive)
+	if errors.Is(err,pgx.ErrNoRows) {
+		err = apperrors.ErrUserNotFound
 	}
-
-	for rows.Next() {
-		var user models.User
-		var id int
-		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
-		if err != nil {
-			return users,err
-		}
-		users = append(users, user)
-	}
-	return users,nil
+	return user,err
 }
 
 func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (models.PendingUser, error) {
