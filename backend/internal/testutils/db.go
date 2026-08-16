@@ -2,9 +2,9 @@ package testutils
 
 import (
 	"context"
+	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"testing"
-	"github.com/Tanzor-Disco/skaM/models"
 )
 
 type TestDB struct {
@@ -40,15 +40,13 @@ func (tdb *TestDB) GetUsersByEmail(t *testing.T, email string) []models.User {
 
 	for rows.Next() {
 		var user models.User
-		var id int
-		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
 		if err != nil {
 			t.Fatal(err)
 		}
 		users = append(users, user)
 	}
 	return users
-
 }
 
 func (tdb *TestDB) GetPendingUserByEmail(t *testing.T, email string) models.PendingUser {
@@ -73,7 +71,7 @@ func (tdb *TestDB) GetPendingUserByEmail(t *testing.T, email string) models.Pend
 		users = append(users, user)
 	}
 	if len(users) != 1 {
-		t.Fatalf("the amount of found users doesn't equal to one: %+v",users)
+		t.Fatalf("the amount of found users doesn't equal to one: %+v", users)
 	}
 	return users[0]
 
@@ -112,8 +110,7 @@ func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []models.User) {
 	}
 	for rows.Next() {
 		var user models.User
-		var id int
-		err := rows.Scan(&id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -141,4 +138,3 @@ func (tdb *TestDB) GetAllRequests(t *testing.T) (users []models.PendingUser) {
 	}
 	return
 }
-

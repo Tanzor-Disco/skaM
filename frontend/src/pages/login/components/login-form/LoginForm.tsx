@@ -1,5 +1,6 @@
 import './LoginForm.css'
 import InputField from '@/components/input-field/InputField'
+import { useNavigate } from "react-router"
 import type {Dispatch,SetStateAction} from "react"
 
 interface LoginFormProps {
@@ -7,7 +8,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({setInvalidInput}:LoginFormProps) {
-
+	const navigate = useNavigate()
 	async function handleLoginSubmit(formData:FormData) {
 		const formObj = Object.fromEntries(formData)
 		const headers = new Headers()
@@ -22,6 +23,8 @@ export default function LoginForm({setInvalidInput}:LoginFormProps) {
 			case "ERR_WRONG_LOGIN_DATA":
 				setInvalidInput(true)
 				break
+			case "ERR_NONE":
+				navigate("/main")
 		}
 	}
     return (

@@ -11,6 +11,7 @@ type RegisterRequest struct {
 }
 
 type User struct {
+	Id             int
 	Email          string
 	Username       string
 	PasswordHash   string
@@ -18,7 +19,8 @@ type User struct {
 }
 
 func NewUser(email, username, passwordHash string) User {
-	return User {
+	return User{
+		Id:             0,
 		Email:          email,
 		Username:       username,
 		PasswordHash:   passwordHash,
@@ -34,4 +36,3 @@ type PendingUser struct {
 	TokenHash    string
 	ExpiresAt    time.Time
 }
-

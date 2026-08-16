@@ -17,28 +17,27 @@ import (
 )
 
 func (s *server) checkEmailTaken(email string) error {
-	_,err := s.db.GetUserByEmail(email)
+	_, err := s.db.GetUserByEmail(email)
 	if err == apperrors.ErrUserNotFound {
 		return nil
 	}
 	if err != nil {
-		log.Printf("couldn't get user by email: %v",err)
+		log.Printf("couldn't get user by email: %v", err)
 		return apperrors.ErrDB
 	}
 
 	return apperrors.ErrEmailTaken
 }
 
-
 func (s *server) getUserData(request *http.Request) (models.RegisterRequest, error) {
 	var currUser models.RegisterRequest
 	err := json.NewDecoder(request.Body).Decode(&currUser)
 	if err != nil {
-		log.Printf("couldn't decode request body: %v",err)
+		log.Printf("couldn't decode request body: %v", err)
 	}
 	err = validate.RegisterRequest(currUser)
 	if err != nil {
-		return currUser,err
+		return currUser, err
 	}
 	err = s.checkEmailTaken(currUser.Email)
 	return currUser, err
@@ -58,9 +57,9 @@ func getUserDataErrorBody(err error) serverResponseBody {
 	case apperrors.ErrInvalidPasswordLength:
 		body = newServerResponseBody(false, apperrors.KindErrInvalidPasswordLength)
 	case apperrors.ErrEmailTaken:
-		body = newServerResponseBody(false,apperrors.KindErrEmailTaken)
+		body = newServerResponseBody(false, apperrors.KindErrEmailTaken)
 	case apperrors.ErrDB:
-		body = newServerResponseBody(false,apperrors.KindErrDB)
+		body = newServerResponseBody(false, apperrors.KindErrDB)
 	}
 	return body
 }
@@ -111,15 +110,14 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 
 	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)
-	
+
 	go func() {
 		err := verify.SendEmail(s.baseURL, token, currUser.Email, s.SMTPData)
 		if err != nil {
 			log.Printf("handleRegister error: %v", err)
 		}
 	}()
-	
-	
+
 }
 
 func (s *server) addUserToMainDB(w http.ResponseWriter, req *http.Request) {
@@ -135,6 +133,6 @@ func (s *server) addUserToMainDB(w http.ResponseWriter, req *http.Request) {
 	err = s.db.CreateUser(ctx, userDB)
 	if err != nil {
 		log.Printf("error in AddUserToMain: %v", err)
-	} 
+	}
 	http.Redirect(w, req, "/login", http.StatusSeeOther)
 }

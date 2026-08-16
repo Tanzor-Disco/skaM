@@ -2,19 +2,19 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"testing"
 	"os/exec"
-	"context"
+	"testing"
 
+	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
-	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/lpernett/godotenv"
 )
 
@@ -39,9 +39,9 @@ func TestMain(m *testing.M) {
 	}
 
 	//create Server Data
-	TestSMTPData := models.NewSMTPData("","","localhost","localhost:1025","test@example.com")
+	TestSMTPData := models.NewSMTPData("", "", "localhost", "localhost:1025", "test@example.com")
 	TestBaseURL := "http://localhost:8080"
-	TestServerData := models.NewServerData(testURI,TestBaseURL,TestSMTPData)
+	TestServerData := models.NewServerData(testURI, TestBaseURL, TestSMTPData)
 	srv, err = newServer(TestServerData)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +52,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	//launch and finish the tests
 	code := m.Run()
 	tdb.Close()
@@ -164,24 +164,24 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 }
 
 func TestHandleRequest_EmailTaken(t *testing.T) {
-	userRequest := models.RegisterRequest {
-		Email:    "pidoras_@mail.ru", 
-		Username: "pidoras_new", 
+	userRequest := models.RegisterRequest{
+		Email:    "pidoras_@mail.ru",
+		Username: "pidoras_new",
 		Password: "1321313213131",
 	}
-	user := models.User {
-		Email:    "pidoras_@mail.ru", 	
-		Username: "pidoras_new",      
-       	PasswordHash: "1321313213131",
+	user := models.User{
+		Email:          "pidoras_@mail.ru",
+		Username:       "pidoras_new",
+		PasswordHash:   "1321313213131",
 		LastYearActive: 2026,
 	}
-	srv.db.CreateUser(context.Background(),user)
-	defer tdb.DeleteUsersByEmail(t,user.Email)
-	correct := newServerResponseBody(false,apperrors.KindErrEmailTaken)
-	serverRecorder := handleUser(t,userRequest)
-	defer tdb.DeletePendingUsersByEmail(t,userRequest.Email)
+	srv.db.CreateUser(context.Background(), user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
+	correct := newServerResponseBody(false, apperrors.KindErrEmailTaken)
+	serverRecorder := handleUser(t, userRequest)
+	defer tdb.DeletePendingUsersByEmail(t, userRequest.Email)
 	serverResp := serverRecorder.Result()
-	checkStatus(t,serverRecorder,http.StatusBadRequest)
+	checkStatus(t, serverRecorder, http.StatusBadRequest)
 	validateResponseBody(t, serverResp, correct)
 }
 
