@@ -1,12 +1,8 @@
-:root {
-	--bright-panel: #202020;
-}
-
 .room-entry {
 	display:flex;
 	flex-direction: row;
 	gap:3px;
-	background-color:var(--bright-panel);
+	background-color:var(--bright-dark);
 	width:300px;
 	align-items: center;
 }

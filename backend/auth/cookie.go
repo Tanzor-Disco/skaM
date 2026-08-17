@@ -7,20 +7,20 @@ import (
 	"net/http"
 )
 
-func CreateSessionID() (string, error) {
+func CreateSessionString() (string, error) {
 	buf := make([]byte, 32)
 	_, err := rand.Read(buf)
 	if err != nil {
 		return "", fmt.Errorf("createSession: %w", err)
 	}
-	sessionID := hex.EncodeToString(buf)
-	return sessionID, nil
+	sessionString := hex.EncodeToString(buf)
+	return sessionString, nil
 }
 
-func CreateSessionCookie(sessionID string) http.Cookie {
+func CreateSessionCookie(sessionString string) http.Cookie {
 	return http.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
+		Name:     "session_string",
+		Value:    sessionString,
 		Path:     "/",
 		MaxAge:   60 * 60 * 24 * 7,
 		HttpOnly: true,

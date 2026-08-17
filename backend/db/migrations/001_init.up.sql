@@ -13,13 +13,14 @@ CREATE TABLE IF NOT EXISTS rooms (
 
 CREATE TABLE IF NOT EXISTS room_users (
 	id BIGSERIAL PRIMARY KEY,
-	room_id BIGINT NOT NULL,
-	user_id BIGINT NOT NULL
+	room_id BIGINT NOT NULL REFERENCES rooms(id),
+	user_id BIGINT NOT NULL REFERENCES users(id),
+	UNIQUE(room_id,user_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
 	id BIGSERIAL PRIMARY KEY,
-	user_id BIGINT NOT NULL,
-	room_id BIGINT NOT NULL,
+	user_id BIGINT NOT NULL REFERENCES users(id),
+	room_id BIGINT NOT NULL REFERENCES rooms(id),
 	message_text TEXT NOT NULL CHECK(message_text <> '')
 );

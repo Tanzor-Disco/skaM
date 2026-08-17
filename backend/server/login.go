@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Tanzor-Disco/skaM/auth"
+	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -51,16 +52,17 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID, err := auth.CreateSessionID()
+	sessionString, err := auth.CreateSessionString()
 	if err != nil {
 		log.Printf("auth error: %v", err)
 		body := newServerResponseBody(false, apperrors.KindErrInternal)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
-	cookie := auth.CreateSessionCookie(sessionID)
+	cookie := auth.CreateSessionCookie(sessionString)
 	http.SetCookie(w, &cookie)
-	err = s.db.CreateSession(r.Context(), userDB.Id, sessionID)
+	userSession := db.NewUserSession(userDB.Id,sessionString)
+	err = s.db.CreateSession(r.Context(), userSession)
 	if err != nil {
 		log.Printf("db: %v", err)
 		body := newServerResponseBody(false, apperrors.KindErrInternal)
