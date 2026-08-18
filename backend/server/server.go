@@ -10,7 +10,6 @@ import (
 
 type server struct {
 	db       *db.DB
-	baseURL  string
 	SMTPData models.SMTPData
 }
 
@@ -21,7 +20,6 @@ func newServer(serverData models.ServerData) (*server, error) {
 	}
 	return &server{
 		db:       db,
-		baseURL:  serverData.BaseURL,
 		SMTPData: serverData.SMTPData,
 	}, nil
 }

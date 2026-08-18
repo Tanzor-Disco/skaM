@@ -34,7 +34,7 @@ func main() {
 	}
 
 	//Run the server
-	SMTPData := models.NewSMTPData(SMTPUsername, SMTPPassword, SMTPHost, SMTPAddr, SMTPFrom)
-	serverData := models.NewServerData(URI, baseURL, SMTPData)
+	SMTPData := models.NewSMTPData(SMTPUsername, SMTPPassword, SMTPHost, SMTPAddr, SMTPFrom, baseURL)
+	serverData := models.NewServerData(URI, SMTPData)
 	log.Fatal(server.Run(serverData))
 }

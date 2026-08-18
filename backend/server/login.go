@@ -22,7 +22,7 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error decoding json: %v", err)
 		body := newServerResponseBody(false, apperrors.KindErrInternal)
-		sendJSON(w, http.StatusInternalServerError, body)
+		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
@@ -59,9 +59,7 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
-	cookie := auth.CreateSessionCookie(sessionString)
-	http.SetCookie(w, &cookie)
-	userSession := db.NewUserSession(userDB.Id,sessionString)
+	userSession := db.NewUserSession(userDB.Id, sessionString)
 	err = s.db.CreateSession(r.Context(), userSession)
 	if err != nil {
 		log.Printf("db: %v", err)
@@ -69,6 +67,8 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
+	cookie := auth.CreateSessionCookie(sessionString)
+	http.SetCookie(w, &cookie)
 
 	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)

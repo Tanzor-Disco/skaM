@@ -7,6 +7,6 @@ import (
 func RoomNameLength(roomName string) error {
 	if len(roomName) > 0 && len(roomName) < 21 {
 		return nil
-	} 
+	}
 	return apperrors.ErrInvalidRoomNameLength
 }

@@ -7,16 +7,15 @@ import (
 	"github.com/Tanzor-Disco/skaM/db"
 )
 
-func (s *server) getUserSession(r *http.Request) (db.UserSession,error) {
-	cookie,err := r.Cookie("session_string")
+func (s *server) getUserSession(r *http.Request) (db.UserSession, error) {
+	cookie, err := r.Cookie("session_string")
 	sessionString := cookie.Value
 	if err != nil {
-		return db.UserSession{}, fmt.Errorf("r.Cookie: %w",err)
+		return db.UserSession{}, fmt.Errorf("r.Cookie: %w", err)
 	}
-	userSession,err := s.db.GetUserSessionBySessionString(r.Context(),sessionString)
+	userSession, err := s.db.GetUserSessionBySessionString(r.Context(), sessionString)
 	if err != nil {
-		return db.UserSession{}, fmt.Errorf("GetUserSessionBySessionString: %w",err)
+		return db.UserSession{}, fmt.Errorf("GetUserSessionBySessionString: %w", err)
 	}
 	return userSession, nil
 }
-

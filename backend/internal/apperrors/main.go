@@ -1,7 +1,6 @@
 package apperrors
 
-import (
-)
+import ()
 
 const (
 	KindErrUnauthorized = "ERR_UNAUTHORIZED"

@@ -33,16 +33,6 @@ func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (
 	return user, err
 }
 
-func (db *DB) PeriodicPendingDelete() {
-	for {
-		err := db.deleteExpired()
-		if err != nil {
-			log.Printf("failed to delete expired users from pending: %v", err)
-		}
-		time.Sleep(1 * time.Hour)
-	}
-}
-
 func (db *DB) deleteExpired() error {
 	_, err := db.pool.Exec(context.Background(),
 		`
@@ -53,4 +43,14 @@ func (db *DB) deleteExpired() error {
 		return err
 	}
 	return nil
+}
+
+func (db *DB) PeriodicPendingDelete() {
+	for {
+		err := db.deleteExpired()
+		if err != nil {
+			log.Printf("failed to delete expired users from pending: %v", err)
+		}
+		time.Sleep(1 * time.Hour)
+	}
 }

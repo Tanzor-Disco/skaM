@@ -46,12 +46,12 @@ func getEmailBody(baseURL string, token string) (string, error) {
 	return body, nil
 }
 
-func SendEmail(baseURL, token, to string, data models.SMTPData) error {
+func SendEmail(token, to string, data models.SMTPData) error {
 	var auth smtp.Auth
 	if data.Username != "" && data.Password != "" {
 		auth = smtp.PlainAuth("", data.Username, data.Password, data.Host)
 	}
-	body, err := getEmailBody(baseURL, token)
+	body, err := getEmailBody(data.BaseURL, token)
 	if err != nil {
 		return err
 	}

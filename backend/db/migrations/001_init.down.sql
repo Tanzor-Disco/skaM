@@ -1,7 +1,7 @@
-DROP TABLE users;
-
-DROP TABLE rooms;
+DROP TABLE messages;
 
 DROP TABLE room_users;
 
-DROP TABLE messages;
+DROP TABLE rooms;
+
+DROP TABLE users;

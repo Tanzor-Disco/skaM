@@ -10,7 +10,7 @@ type RoomUser struct {
 }
 
 func NewRoomUser(roomID, userID int) RoomUser {
-	return RoomUser {
+	return RoomUser{
 		RoomID: roomID,
 		UserID: userID,
 	}

@@ -112,7 +112,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	sendJSON(w, http.StatusOK, body)
 
 	go func() {
-		err := verify.SendEmail(s.baseURL, token, currUser.Email, s.SMTPData)
+		err := verify.SendEmail(token, currUser.Email, s.SMTPData)
 		if err != nil {
 			log.Printf("handleRegister error: %v", err)
 		}

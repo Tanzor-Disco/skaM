@@ -138,3 +138,29 @@ func (tdb *TestDB) GetAllRequests(t *testing.T) (users []models.PendingUser) {
 	}
 	return
 }
+
+func (tdb *TestDB) GetUserIDByEmail(t *testing.T, email string) int {
+	t.Helper()
+	var id int
+	err := tdb.pool.QueryRow(context.Background(),
+		`
+	SELECT id FROM users WHERE email = $1
+	`,
+		email).Scan(&id)
+	if err != nil {
+		t.Fatalf("getUserIDByEmail: %v", err)
+	}
+	return id
+}
+
+func (tdb *TestDB) DeleteSessionsByUserID(t *testing.T, id int) {
+	t.Helper()
+	_, err := tdb.pool.Exec(context.Background(),
+		`
+	DELETE FROM user_sessions WHERE user_id = $1
+	`,
+		id)
+	if err != nil {
+		t.Fatalf("DeleteSessionsByUserID: %v", err)
+	}
+}

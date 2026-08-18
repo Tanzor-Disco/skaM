@@ -57,7 +57,7 @@ func validatePassword(password string) error {
 }
 
 func validateUsername(username string) error {
-	//database username has type varchar 20 which limits the max length to 30
+	//database username has type varchar 20 which limits the max length to 20
 	if len(username) >= 0 && len(username) <= 20 {
 		return nil
 	}

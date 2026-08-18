@@ -9,8 +9,8 @@ type Room struct {
 }
 
 func NewRoom(name string) Room {
-	return Room {
-		Name:name,
+	return Room{
+		Name: name,
 	}
 }
 
@@ -22,7 +22,7 @@ func (db *DB) CreateRoom(ctx context.Context, room Room) (int, error) {
 	VALUES ($1)
 	RETURNING id
 	`,
-	room.Name,
+		room.Name,
 	).Scan(&roomID)
 	return roomID, err
 }
