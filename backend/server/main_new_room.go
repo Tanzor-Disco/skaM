@@ -14,6 +14,10 @@ type RoomRegisterRequest struct {
 	Name string
 }
 
+// handleMainNewRoom handles POST requests to /api/main/room/new
+// It reads the sent room registration data, gets the user session string
+// Validates room name length, then creates entries in rooms with room name
+// And in room_users with user id that it got from user_sessions and room id
 func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userSession, err := s.getUserSession(r)
@@ -29,7 +33,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("couldn't decode json: %v", err)
 		body := newServerResponseBody(false, apperrors.KindErrInternal)
-		sendJSON(w, http.StatusInternalServerError, body)
+		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
@@ -61,5 +65,4 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 
 	body := newServerResponseBody(true, apperrors.KindErrNone)
 	sendJSON(w, http.StatusOK, body)
-
 }

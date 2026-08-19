@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +14,7 @@ import (
 func handleLoginDataDecode(t *testing.T, user userLoginData) *httptest.ResponseRecorder {
 	t.Helper()
 	w := httptest.NewRecorder()
-	r := createDecodeRequest(t, user)
+	r := createDecodeRequest(t, user, nil)
 	srv.handleLogin(w, r)
 	return w
 }
@@ -23,45 +22,9 @@ func handleLoginDataDecode(t *testing.T, user userLoginData) *httptest.ResponseR
 func handleLoginDataRaw(t *testing.T, user string) *httptest.ResponseRecorder {
 	t.Helper()
 	w := httptest.NewRecorder()
-	r := createRawRequest(t, user)
+	r := createRawRequest(t, user, nil)
 	srv.handleLogin(w, r)
 	return w
-}
-
-type wantedLoginResult struct {
-	Code        int
-	Success     bool
-	ErrKind     string
-	CookieExist bool
-}
-
-func verifyLoginResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedLoginResult) {
-	t.Helper()
-	if w.Code != wanted.Code {
-		t.Fatalf("verifyLoginResponse: code of the response doesn't match:\n got %v\n wanted %v", w.Code, wanted.Code)
-	}
-	var gotBody serverResponseBody
-	err := json.NewDecoder(w.Body).Decode(&gotBody)
-	if err != nil {
-		t.Fatalf("verifyLoginResponse: couldn't decode the server response")
-	}
-	if gotBody.Success != wanted.Success {
-		t.Fatalf("verifyLoginResponse: success of the response doesn't match:\n got %v\n wanted %v", gotBody.Success, wanted.Success)
-	}
-	if gotBody.ErrorKind != wanted.ErrKind {
-		t.Fatalf("verifyLoginResponse: error kind of the response doesn't match:\n got %v\n wanted %v", gotBody.ErrorKind, wanted.ErrKind)
-	}
-	cookies := w.Result().Cookies()
-	if (len(cookies) == 1) != wanted.CookieExist {
-		t.Fatalf("got %v cookies, wanted cookies: %v", len(cookies), wanted.CookieExist)
-	}
-	if len(cookies) == 0 {
-		return
-	}
-	cookie := cookies[0]
-	if cookie.Name != "session_string" {
-		t.Fatalf("verifyLoginResponse: cookie name mismatch:\n got %v\n wanted %v", cookie.Name, "session_string")
-	}
 }
 
 func TestHandleLogin_Valid(t *testing.T) {
@@ -85,13 +48,13 @@ func TestHandleLogin_Valid(t *testing.T) {
 		Password: "123",
 	}
 	w := handleLoginDataDecode(t, userLogin)
-	wanted := wantedLoginResult{
+	wanted := wantedResult{
 		Code:        http.StatusOK,
 		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: true,
 	}
-	verifyLoginResponse(t, w, wanted)
+	verifyResponse(t, w, wanted)
 }
 
 func TestHandleLogin_NonExistent(t *testing.T) {
@@ -100,25 +63,25 @@ func TestHandleLogin_NonExistent(t *testing.T) {
 		Password: "123",
 	}
 	w := handleLoginDataDecode(t, userLogin)
-	wanted := wantedLoginResult{
+	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
 		Success:     false,
 		ErrKind:     apperrors.KindErrWrongLoginData,
 		CookieExist: false,
 	}
-	verifyLoginResponse(t, w, wanted)
+	verifyResponse(t, w, wanted)
 }
 
 func TestHandleLogin_InvalidJSON(t *testing.T) {
 	userLogin := ""
 	w := handleLoginDataRaw(t, userLogin)
-	wanted := wantedLoginResult{
+	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
 		Success:     false,
 		ErrKind:     apperrors.KindErrInternal,
 		CookieExist: false,
 	}
-	verifyLoginResponse(t, w, wanted)
+	verifyResponse(t, w, wanted)
 }
 
 func TestHandleLogin_Wrong_Password(t *testing.T) {
@@ -142,11 +105,11 @@ func TestHandleLogin_Wrong_Password(t *testing.T) {
 		Password: "456",
 	}
 	w := handleLoginDataDecode(t, userLogin)
-	wanted := wantedLoginResult{
+	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
 		Success:     false,
 		ErrKind:     apperrors.KindErrWrongLoginData,
 		CookieExist: false,
 	}
-	verifyLoginResponse(t, w, wanted)
+	verifyResponse(t, w, wanted)
 }

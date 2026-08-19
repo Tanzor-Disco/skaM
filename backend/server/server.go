@@ -13,6 +13,7 @@ type server struct {
 	SMTPData models.SMTPData
 }
 
+// newServer creates a new server instance that stores db struct and SMTPData
 func newServer(serverData models.ServerData) (*server, error) {
 	db, err := db.Connect(serverData.URI)
 	if err != nil {
@@ -24,6 +25,7 @@ func newServer(serverData models.ServerData) (*server, error) {
 	}, nil
 }
 
+// serverResponseBody represents the JSON structure used in server responses
 type serverResponseBody struct {
 	Success   bool   `json:"success"`
 	ErrorKind string `json:"error_kind"`
@@ -36,6 +38,8 @@ func newServerResponseBody(success bool, errorKind string) serverResponseBody {
 	}
 }
 
+// sendJSON encodes serverResponseBody instance to bytes, sets the header to JSON, sets the selected code
+// Writes to ResponseWriter body
 func sendJSON(w http.ResponseWriter, code int, body serverResponseBody) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

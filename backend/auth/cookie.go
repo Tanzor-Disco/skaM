@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// CreateSessionString generates a unique token that is used in cookies and stored in user_sessions db
 func CreateSessionString() (string, error) {
 	buf := make([]byte, 32)
 	_, err := rand.Read(buf)

@@ -69,6 +69,10 @@ func (s *server) registerPendingUser(ctx context.Context, userDB models.PendingU
 	return err
 }
 
+// handleRegister handles POST requests to /api/register.
+// It validates the registration data, hashes the password, creates an email
+// verification token and expiration time, stores the pending user in the database,
+// and sends the verification email asynchronously.
 func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	currUser, err := s.getUserData(req)
@@ -120,6 +124,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 
 }
 
+// addUserToMainDB takes user info from pending_users and adds it to users DB
 func (s *server) addUserToMainDB(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	token := req.URL.Query().Get("token")

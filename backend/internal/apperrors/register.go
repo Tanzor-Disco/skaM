@@ -12,7 +12,7 @@ var ErrInvalidPasswordLength = errors.New("invalid password length")
 var ErrInvalidUsernameLength = errors.New("invalid username length")
 var ErrTokenCreation = errors.New("Failed to create a token")
 
-// error kinds for http responses
+// KindErrors are used as part of JSON sent to frontend from server to add extra context
 const (
 	KindErrHashingPassword        = "ERR_HASHING_PASSWORD"
 	KindErrEmailTaken             = "ERR_EMAIL_TAKEN"

@@ -13,7 +13,7 @@ import (
 
 func handleUser(t *testing.T, user models.RegisterRequest) *httptest.ResponseRecorder {
 	t.Helper()
-	r := createDecodeRequest(t, user)
+	r := createDecodeRequest(t, user, nil)
 	w := httptest.NewRecorder()
 	srv.handleRegister(w, r)
 	return w

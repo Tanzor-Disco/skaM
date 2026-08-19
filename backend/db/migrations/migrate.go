@@ -11,6 +11,7 @@ import (
 //go:embed *.sql
 var migrations embed.FS
 
+// Update updates to the lates available .sql migration
 func Update(databaseURL string) error {
 	source, err := iofs.New(migrations, ".")
 	if err != nil {
@@ -26,6 +27,7 @@ func Update(databaseURL string) error {
 	return nil
 }
 
+// Reset applies all the down migrations and then uses all up migrations
 func Reset(databaseURL string) error {
 	source, err := iofs.New(migrations, ".")
 	m, err := migrate.NewWithSourceInstance("iofs", source, databaseURL)
@@ -43,6 +45,7 @@ func Reset(databaseURL string) error {
 	return nil
 }
 
+// Force forces a certain migration
 func Force(databaseURL string, migrationNumber int) error {
 	source, err := iofs.New(migrations, ".")
 	m, err := migrate.NewWithSourceInstance("iofs", source, databaseURL)

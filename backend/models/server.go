@@ -1,5 +1,6 @@
 package models
 
+// SMTPData represents data required for go SMTP package
 type SMTPData struct {
 	Username string
 	Password string
@@ -20,6 +21,7 @@ func NewSMTPData(username, password, host, addr, from, baseURL string) SMTPData 
 	}
 }
 
+// ServerData represents a set of data passed to a new instance of server struct
 type ServerData struct {
 	URI      string
 	BaseURL  string

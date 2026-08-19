@@ -16,6 +16,10 @@ type userLoginData struct {
 	Password string
 }
 
+// handleLogin handles POST requests to /api/login
+// It processes sent JSON, gets the user from users db and checks that the fields match
+// After the verification is successful it send the user cookie that contains unique sessionString
+// It creates an entry in user_sessions DB that contains the user id and sessionString
 func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var user userLoginData
 	err := json.NewDecoder(r.Body).Decode(&user)

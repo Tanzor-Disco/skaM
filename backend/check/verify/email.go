@@ -12,6 +12,8 @@ import (
 	"text/template"
 )
 
+// CreateToken generates a unique token for email confirmation.
+// It returns the raw token for the confirmation URL and its SHA-256 hash for database storage in pending_users.
 func CreateToken() (string, string, error) {
 	var token string
 	var tokenHashed string
@@ -30,6 +32,8 @@ func CreateToken() (string, string, error) {
 //go:embed templates/body.html
 var bodyEmbed string
 
+// getEmailBody uses embedded body.html to create a body for go SMTP module
+// It replaces {{.}} in body.html with a link to an endpoint that contains a unique token
 func getEmailBody(baseURL string, token string) (string, error) {
 	var body string
 	template, err := template.New("body").Parse(bodyEmbed)
@@ -46,6 +50,7 @@ func getEmailBody(baseURL string, token string) (string, error) {
 	return body, nil
 }
 
+// SendEmail uses go SMTP module to send a verification email to a specified user
 func SendEmail(token, to string, data models.SMTPData) error {
 	var auth smtp.Auth
 	if data.Username != "" && data.Password != "" {

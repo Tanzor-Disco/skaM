@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/Tanzor-Disco/skaM/auth"
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
@@ -85,7 +86,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func createDecodeRequest[T any](t *testing.T, body T) *http.Request {
+func createDecodeRequest[T any](t *testing.T, body T, sessionString *string) *http.Request {
 	t.Helper()
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
@@ -94,12 +95,56 @@ func createDecodeRequest[T any](t *testing.T, body T) *http.Request {
 
 	r := httptest.NewRequest("POST", "/api/", bytes.NewReader(bodyBytes))
 	r.Header.Set("Content-Type", "application/json")
+	if sessionString != nil {
+		cookie := auth.CreateSessionCookie(*sessionString)
+		r.AddCookie(&cookie)
+	}
 	return r
 }
 
-func createRawRequest(t *testing.T, body string) *http.Request {
+func createRawRequest(t *testing.T, body string, sessionString *string) *http.Request {
 	t.Helper()
 	r := httptest.NewRequest("POST", "/api/", bytes.NewReader([]byte(body)))
 	r.Header.Set("Content-Type", "application/json")
+	if sessionString != nil {
+		cookie := auth.CreateSessionCookie(*sessionString)
+		r.AddCookie(&cookie)
+	}
 	return r
+}
+
+type wantedResult struct {
+	Code        int
+	Success     bool
+	ErrKind     string
+	CookieExist bool
+}
+
+func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedResult) {
+	t.Helper()
+	if w.Code != wanted.Code {
+		t.Fatalf("verifyResponse: code of the response doesn't match:\n got %v\n wanted %v", w.Code, wanted.Code)
+	}
+	var gotBody serverResponseBody
+	err := json.NewDecoder(w.Body).Decode(&gotBody)
+	if err != nil {
+		t.Fatalf("verifyResponse: couldn't decode the server response")
+	}
+	if gotBody.Success != wanted.Success {
+		t.Fatalf("verifyResponse: success of the response doesn't match:\n got %v\n wanted %v", gotBody.Success, wanted.Success)
+	}
+	if gotBody.ErrorKind != wanted.ErrKind {
+		t.Fatalf("verifyResponse: error kind of the response doesn't match:\n got %v\n wanted %v", gotBody.ErrorKind, wanted.ErrKind)
+	}
+	cookies := w.Result().Cookies()
+	if (len(cookies) == 1) != wanted.CookieExist {
+		t.Fatalf("got %v cookies, wanted cookies: %v", len(cookies), wanted.CookieExist)
+	}
+	if len(cookies) == 0 {
+		return
+	}
+	cookie := cookies[0]
+	if cookie.Name != "session_string" {
+		t.Fatalf("verifyResponse: cookie name mismatch:\n got %v\n wanted %v", cookie.Name, "session_string")
+	}
 }

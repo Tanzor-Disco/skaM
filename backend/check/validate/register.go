@@ -64,6 +64,7 @@ func validateUsername(username string) error {
 	return apperrors.ErrInvalidUsernameLength
 }
 
+// RegisterRequest checks the data sent to /api/register
 func RegisterRequest(request models.RegisterRequest) error {
 	err := validateEmail(request.Email)
 	if err != nil {

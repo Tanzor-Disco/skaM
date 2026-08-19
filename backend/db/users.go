@@ -47,6 +47,8 @@ func (db *DB) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
+// GetUserByEmail sends a DB query that returns an models.User instance
+// In case the user with such email doesn't exist it returns apperrors.ErrUserNotFound
 func (db *DB) GetUserByEmail(email string) (models.User, error) {
 	var user models.User
 	err := db.pool.QueryRow(context.Background(),
