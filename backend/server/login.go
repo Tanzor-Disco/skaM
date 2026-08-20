@@ -25,33 +25,33 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("error decoding json: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
 	userDB, err := s.db.GetUserByEmail(user.Email)
 	if err == apperrors.ErrUserNotFound {
-		body := newServerResponseBody(false, apperrors.KindErrWrongLoginData)
+		body := newServerResponseBody[any](false, apperrors.KindErrWrongLoginData, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
 	if err != nil {
 		log.Printf("error getting the user from db: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userDB.PasswordHash), []byte(user.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		body := newServerResponseBody(false, apperrors.KindErrWrongLoginData)
+		body := newServerResponseBody[any](false, apperrors.KindErrWrongLoginData, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
 	if err != nil {
 		log.Printf("couldn't compare hash and password: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
@@ -59,7 +59,7 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	sessionString, err := auth.CreateSessionString()
 	if err != nil {
 		log.Printf("auth error: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
@@ -67,13 +67,13 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	err = s.db.CreateSession(r.Context(), userSession)
 	if err != nil {
 		log.Printf("db: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 	cookie := auth.CreateSessionCookie(sessionString)
 	http.SetCookie(w, &cookie)
 
-	body := newServerResponseBody(true, apperrors.KindErrNone)
+	body := newServerResponseBody[any](true, apperrors.KindErrNone, nil)
 	sendJSON(w, http.StatusOK, body)
 }

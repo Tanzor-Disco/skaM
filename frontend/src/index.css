@@ -1,11 +1,11 @@
 :root {
     --background: #18181b;
-	--bright-dark: #202020;
+    --bright-dark: #202020;
     --text: white;
     --accent-dark: #29501e;
     --accent: #356a28;
     --surface: #2c2c2c;
-	--error: #B91C1C;
+    --error: #b91c1c;
 }
 
 html {
@@ -75,12 +75,12 @@ a {
 }
 
 .error-message {
-	font-weight:400;
-	color:var(--error);
-	font-size:0.8rem;
+    font-weight: 400;
+    color: var(--error);
+    font-size: 0.8rem;
 }
 
 .position-absolute {
-	position:absolute;
-	top:100%;
+    position: absolute;
+    top: 100%;
 }

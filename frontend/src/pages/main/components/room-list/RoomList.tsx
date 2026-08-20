@@ -1,18 +1,33 @@
-import "./RoomList.css"
+import { useEffect, useState } from 'react'
+import './RoomList.css'
 
-import RoomEntry from "./components/room-entry/RoomEntry"
-import RoomListHeader from "./components/room-header/RoomListHeader"
-import logo from "@/assets/logo.svg"
+import RoomEntry from './components/room-entry/RoomEntry'
+import RoomListHeader from './components/room-header/RoomListHeader'
+import logo from '@/assets/logo.svg'
+import type { Room } from '@/models/Room'
 
 export default function RoomList() {
-	const response = fetch("/api/main/rooms")
-	return (
-		<section className="room-list">
-			<RoomListHeader />
-			<div className="room-entries">
-				<RoomEntry roomIcon={logo} roomTitle={"Gei Mira"} />
-				<RoomEntry roomIcon={logo} roomTitle={"Putinskiye Sokoli"} />
-			</div>
-		</section>
-	)
+    const [rooms, setRooms] = useState<Room[]>([])
+    useEffect(() => {
+        async function getRooms() {
+            const response = await fetch('api/main/rooms')
+            if (!response.ok) {
+                return []
+            }
+            const srvRooms = await response.json()
+            setRooms(srvRooms.data)
+        }
+        getRooms()
+    }, [])
+
+    const roomComponents = rooms.map((room: Room) => {
+        return <RoomEntry key={room.ID} roomIcon={logo} roomTitle={room.Name} />
+    })
+
+    return (
+        <section className="room-list">
+            <RoomListHeader setRooms={setRooms} />
+            <div className="room-entries">{roomComponents}</div>
+        </section>
+    )
 }

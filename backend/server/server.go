@@ -26,21 +26,25 @@ func newServer(serverData models.ServerData) (*server, error) {
 }
 
 // serverResponseBody represents the JSON structure used in server responses
-type serverResponseBody struct {
+type serverResponseBody[T any] struct {
 	Success   bool   `json:"success"`
 	ErrorKind string `json:"error_kind"`
+	Data      []T    `json:"data,omitempty"`
 }
 
-func newServerResponseBody(success bool, errorKind string) serverResponseBody {
-	return serverResponseBody{
+// newServerResponseBody creates an instance of serverResponseBody
+// if no data is sent, nil should be used
+func newServerResponseBody[T any](success bool, errorKind string, data []T) serverResponseBody[T] {
+	return serverResponseBody[T]{
 		Success:   success,
 		ErrorKind: errorKind,
+		Data:      data,
 	}
 }
 
 // sendJSON encodes serverResponseBody instance to bytes, sets the header to JSON, sets the selected code
 // Writes to ResponseWriter body
-func sendJSON(w http.ResponseWriter, code int, body serverResponseBody) {
+func sendJSON[T any](w http.ResponseWriter, code int, body serverResponseBody[T]) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 
@@ -52,7 +56,6 @@ func sendJSON(w http.ResponseWriter, code int, body serverResponseBody) {
 	if err != nil {
 		log.Println(err)
 	}
-
 }
 
 func Run(serverData models.ServerData) error {
@@ -65,6 +68,8 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/verify/email/", server.addUserToMainDB)
 	http.HandleFunc("/api/login", server.handleLogin)
 	http.HandleFunc("/api/main/new/room", server.handleMainNewRoom)
+	http.HandleFunc("/api/main/rooms", server.handleMainRooms)
+	http.HandleFunc("/api/root", server.handleRoot)
 
 	go server.db.PeriodicPendingDelete()
 

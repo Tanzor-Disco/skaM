@@ -23,7 +23,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	userSession, err := s.getUserSession(r)
 	if err != nil {
 		log.Printf("getUserSession: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
@@ -32,7 +32,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&registerRequest)
 	if err != nil {
 		log.Printf("couldn't decode json: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
@@ -40,7 +40,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	err = validate.RoomNameLength(registerRequest.Name)
 	if err == apperrors.ErrInvalidRoomNameLength {
 		log.Printf("validate.RoomNameLength: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInvalidRoomNameLength)
+		body := newServerResponseBody[any](false, apperrors.KindErrInvalidRoomNameLength, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
@@ -49,7 +49,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	roomID, err := s.db.CreateRoom(ctx, room)
 	if err != nil {
 		log.Printf("CreateRoom: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
@@ -58,11 +58,12 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	err = s.db.AddUserToRoom(ctx, roomUser)
 	if err != nil {
 		log.Printf("AddUserToRoom: %v", err)
-		body := newServerResponseBody(false, apperrors.KindErrInternal)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
-	body := newServerResponseBody(true, apperrors.KindErrNone)
+	// returning one member slice with room id for frontend to create a room instance
+	body := newServerResponseBody(true, apperrors.KindErrNone, []int{roomID})
 	sendJSON(w, http.StatusOK, body)
 }

@@ -125,7 +125,7 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 	if w.Code != wanted.Code {
 		t.Fatalf("verifyResponse: code of the response doesn't match:\n got %v\n wanted %v", w.Code, wanted.Code)
 	}
-	var gotBody serverResponseBody
+	var gotBody serverResponseBody [any]
 	err := json.NewDecoder(w.Body).Decode(&gotBody)
 	if err != nil {
 		t.Fatalf("verifyResponse: couldn't decode the server response")

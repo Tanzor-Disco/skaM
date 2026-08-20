@@ -2,9 +2,11 @@ package db
 
 import (
 	"context"
+	"fmt"
 )
 
 type Room struct {
+	ID   int
 	Name string
 }
 
@@ -25,4 +27,29 @@ func (db *DB) CreateRoom(ctx context.Context, room Room) (int, error) {
 		room.Name,
 	).Scan(&roomID)
 	return roomID, err
+}
+
+func (db *DB) getRoomByRoomID(ctx context.Context, roomID int) (Room, error) {
+	var room Room
+	err := db.pool.QueryRow(ctx,
+		`
+	SELECT * FROM rooms WHERE id = $1
+	`,
+		roomID).Scan(&room.ID, &room.Name)
+	if err != nil {
+		return room, fmt.Errorf("getRoomByRoomID: %w", err)
+	}
+	return room, nil
+}
+
+func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int) ([]Room, error) {
+	var rooms []Room
+	for _, roomID := range roomIDS {
+		room, err := db.getRoomByRoomID(ctx, roomID)
+		if err != nil {
+			return make([]Room, 0), fmt.Errorf("GetRoomsByRoomIDS: %w", err)
+		}
+		rooms = append(rooms, room)
+	}
+	return rooms, nil
 }

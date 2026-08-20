@@ -43,23 +43,23 @@ func (s *server) getUserData(request *http.Request) (models.RegisterRequest, err
 	return currUser, err
 }
 
-func getUserDataErrorBody(err error) serverResponseBody {
-	var body serverResponseBody
+func getUserDataErrorBody(err error) serverResponseBody[any] {
+	var body serverResponseBody[any]
 	switch err {
 	case apperrors.ErrInvalidEmail:
-		body = newServerResponseBody(false, apperrors.KindErrInvalidEmail)
+		body = newServerResponseBody[any](false, apperrors.KindErrInvalidEmail, nil)
 	case apperrors.ErrInvalidEmailLength:
-		body = newServerResponseBody(false, apperrors.KindErrInvalidEmailLength)
+		body = newServerResponseBody[any](false, apperrors.KindErrInvalidEmailLength, nil)
 	case apperrors.ErrInvalidUsernameLength:
-		body = newServerResponseBody(false, apperrors.KindErrInvalidUsernameLength)
+		body = newServerResponseBody[any](false, apperrors.KindErrInvalidUsernameLength, nil)
 	case apperrors.ErrInvalidPasswordChars:
-		body = newServerResponseBody(false, apperrors.KindErrForbiddenPasswordChars)
+		body = newServerResponseBody[any](false, apperrors.KindErrForbiddenPasswordChars, nil)
 	case apperrors.ErrInvalidPasswordLength:
-		body = newServerResponseBody(false, apperrors.KindErrInvalidPasswordLength)
+		body = newServerResponseBody[any](false, apperrors.KindErrInvalidPasswordLength, nil)
 	case apperrors.ErrEmailTaken:
-		body = newServerResponseBody(false, apperrors.KindErrEmailTaken)
+		body = newServerResponseBody[any](false, apperrors.KindErrEmailTaken, nil)
 	case apperrors.ErrDB:
-		body = newServerResponseBody(false, apperrors.KindErrDB)
+		body = newServerResponseBody[any](false, apperrors.KindErrDB, nil)
 	}
 	return body
 }
@@ -84,7 +84,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(currUser.Password), bcrypt.DefaultCost)
 	if err != nil {
-		body := newServerResponseBody(false, apperrors.KindErrHashingPassword)
+		body := newServerResponseBody[any](false, apperrors.KindErrHashingPassword, nil)
 		log.Printf("handleRegister error: %v", err)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
@@ -93,7 +93,7 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	expiresAt := time.Now().Add(time.Hour)
 	token, tokenHash, err := verify.CreateToken()
 	if err != nil {
-		body := newServerResponseBody(false, apperrors.KindErrTokenCreation)
+		body := newServerResponseBody[any](false, apperrors.KindErrTokenCreation, nil)
 		log.Printf("handleRegister error: %v", err)
 		sendJSON(w, http.StatusInternalServerError, body)
 	}
@@ -106,13 +106,13 @@ func (s *server) handleRegister(w http.ResponseWriter, req *http.Request) {
 	}
 	err = s.registerPendingUser(ctx, pendingUserDB)
 	if err != nil {
-		body := newServerResponseBody(false, apperrors.KindErrDB)
+		body := newServerResponseBody[any](false, apperrors.KindErrDB, nil)
 		log.Printf("handleRegister error: %v", err)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
-	body := newServerResponseBody(true, apperrors.KindErrNone)
+	body := newServerResponseBody[any](true, apperrors.KindErrNone, nil)
 	sendJSON(w, http.StatusOK, body)
 
 	go func() {

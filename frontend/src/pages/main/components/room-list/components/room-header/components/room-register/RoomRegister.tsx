@@ -1,40 +1,65 @@
-import InputField from "@/components/input-field/InputField"
-import "./RoomRegister.css"
-import type {Dispatch,SetStateAction} from "react"
+import FormField from '@/components/form-field/FormField'
+import './RoomRegister.css'
+import { useState, type Dispatch, type SetStateAction } from 'react'
+import type { Room } from '@/models/Room'
+import { newRoom } from '@/models/Room'
 
 interface RoomRegisterProps {
-	setRoomRegisterVisible:Dispatch<SetStateAction<boolean>>
+    setRoomRegisterVisible: Dispatch<SetStateAction<boolean>>
+    setRooms: Dispatch<SetStateAction<Room[]>>
 }
 
-export default function RoomRegister({setRoomRegisterVisible}:RoomRegisterProps) {
-	function handleCancelClick() {
+export default function RoomRegister({
+    setRoomRegisterVisible,
+    setRooms,
+}: RoomRegisterProps) {
+    const [warning, setWarning] = useState('')
+
+    function handleCancelClick() {
+        setRoomRegisterVisible(false)
+    }
+
+    async function handleSubmit(formData: FormData) {
+        const formObj = Object.fromEntries(formData)
+        const headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+        const response = await fetch('/api/main/new/room', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(formObj),
+        })
+        const responseObj = await response.json()
+        if (!response.ok) {
+            switch (responseObj.error_kind) {
+                case 'ERR_INVALID_ROOM_NAME_LENGTH':
+                    setWarning(
+                        'The length of the name should be no more than 20 characters'
+                    )
+            }
+            return
+        }
+        const room = newRoom(responseObj.data[0], formObj.name as string)
+        setRooms((prevRooms) => [...prevRooms, room])
+        setWarning('')
 		setRoomRegisterVisible(false)
-	}
-	async function handleSubmit(formData:FormData) {
-		const formObj = Object.fromEntries(formData)
-		const headers = new Headers
-		headers.append("Content-Type", "application/json")
-		const response = await fetch("/api/main/new/room", {
-			method:"POST",
-			headers:headers,
-			body:JSON.stringify(formObj)
-		})
+    }
 
-	}
-
-	return (
-		<div className="page-overlay">
-			<form className="room-register-form" action={handleSubmit}>
-				<h1>Create a room</h1>
-				<InputField fieldName={"Name"} inputType={"text"} required={true}/>
-				<div className="register-form-buttons">
-					<button onClick={handleCancelClick} type="button">
-						Cancel
-					</button>
-					<button>Create</button>
-				</div>
-
-			</form>
-		</div>
-	)
+    return (
+        <div className="page-overlay">
+            <form className="room-register-form" action={handleSubmit}>
+                <h1>Create a room</h1>
+                <FormField
+                    warning={warning}
+                    fieldName={'Name'}
+                    inputType={'text'}
+                />
+                <div className="register-form-buttons">
+                    <button onClick={handleCancelClick} type="button">
+                        Cancel
+                    </button>
+                    <button>Create</button>
+                </div>
+            </form>
+        </div>
+    )
 }
