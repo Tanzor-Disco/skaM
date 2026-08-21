@@ -72,6 +72,7 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/root", server.handleRoot)
 
 	go server.db.PeriodicPendingDelete()
+	go server.db.PeriodicDeleteAllExpiredSessions()
 
 	return http.ListenAndServe(":8080", nil)
 }

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -47,4 +48,25 @@ func (db *DB) GetUserSessionBySessionString(ctx context.Context, sessionString s
 		return UserSession{}, fmt.Errorf("getUserSessionBySessionString: %w", err)
 	}
 	return user, nil
+}
+
+func (db *DB) deleteAllExpiredSessions() error {
+	_, err := db.pool.Exec(context.Background(),
+		`
+	DELETE FROM user_sessions WHERE expires_at < NOW()
+	`)
+	if err != nil {
+		return fmt.Errorf("deleteAllExpiredSessions: %w", err)
+	}
+	return nil
+}
+
+func (db *DB) PeriodicDeleteAllExpiredSessions() {
+	ticker := time.NewTicker(time.Hour * 24 * 7)
+	for range ticker.C {
+		err := db.deleteAllExpiredSessions()
+		if err != nil {
+			log.Printf("PeriodicDeleteAllExpiredSessions: %v", err)
+		}
+	}
 }
