@@ -86,7 +86,10 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func createDecodeRequest[T any](t *testing.T, body T, sessionString *string) *http.Request {
+// createEncodeRequest is used to create fake http request for tests of handlers
+// It should be utilized if the body of the request is not a string
+// If it is, createRawRequest should be used
+func createEncodeRequest[T any](t *testing.T, body T, sessionString *string) *http.Request {
 	t.Helper()
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
@@ -102,6 +105,9 @@ func createDecodeRequest[T any](t *testing.T, body T, sessionString *string) *ht
 	return r
 }
 
+// createRawRequest is used to create fake http request for tests of handlers
+// It should be utilized if the body of the request is a string
+// If it isn't, createEncodeRequest should be used
 func createRawRequest(t *testing.T, body string, sessionString *string) *http.Request {
 	t.Helper()
 	r := httptest.NewRequest("POST", "/api/", bytes.NewReader([]byte(body)))
@@ -125,7 +131,7 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 	if w.Code != wanted.Code {
 		t.Fatalf("verifyResponse: code of the response doesn't match:\n got %v\n wanted %v", w.Code, wanted.Code)
 	}
-	var gotBody serverResponseBody [any]
+	var gotBody serverResponseBody[any]
 	err := json.NewDecoder(w.Body).Decode(&gotBody)
 	if err != nil {
 		t.Fatalf("verifyResponse: couldn't decode the server response")

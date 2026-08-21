@@ -14,7 +14,7 @@ import (
 func handleLoginDataDecode(t *testing.T, user userLoginData) *httptest.ResponseRecorder {
 	t.Helper()
 	w := httptest.NewRecorder()
-	r := createDecodeRequest(t, user, nil)
+	r := createEncodeRequest(t, user, nil)
 	srv.handleLogin(w, r)
 	return w
 }

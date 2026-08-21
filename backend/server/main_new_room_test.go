@@ -16,11 +16,11 @@ import (
 func createUserAndSession(t *testing.T, user models.User) (userEmail, sessionString string, userID int) {
 	t.Helper()
 	err := database.CreateUser(context.Background(), user)
-	userID = tdb.GetUserIDByEmail(t, user.Email)
-	userEmail = user.Email
 	if err != nil {
 		t.Fatalf("CreateUser: %v", err)
 	}
+	userID = tdb.GetUserIDByEmail(t, user.Email)
+	userEmail = user.Email
 	sessionString, err = auth.CreateSessionString()
 	if err != nil {
 		t.Fatalf("CreateSessionString: %v", err)
@@ -33,9 +33,9 @@ func createUserAndSession(t *testing.T, user models.User) (userEmail, sessionStr
 	return
 }
 
-func handleNewRoomDecode(t *testing.T, body RoomRegisterRequest, sessionString *string) *httptest.ResponseRecorder {
+func handleNewRoomEncode(t *testing.T, body RoomRegisterRequest, sessionString *string) *httptest.ResponseRecorder {
 	t.Helper()
-	r := createDecodeRequest(t, body, sessionString)
+	r := createEncodeRequest(t, body, sessionString)
 	w := httptest.NewRecorder()
 	srv.handleMainNewRoom(w, r)
 	return w
@@ -59,7 +59,8 @@ func TestHandleMainNewRoom_Valid(t *testing.T) {
 	reqBody := RoomRegisterRequest{
 		Name: "room_test",
 	}
-	w := handleNewRoomDecode(t, reqBody, &sessionString)
+	w := handleNewRoomEncode(t, reqBody, &sessionString)
+	defer tdb.DeleteRoomByRoomName(t, reqBody.Name)
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
@@ -79,7 +80,8 @@ func TestHandleMainNewRoom_NoSession(t *testing.T) {
 	reqBody := RoomRegisterRequest{
 		Name: "room_test",
 	}
-	w := handleNewRoomDecode(t, reqBody, nil)
+	w := handleNewRoomEncode(t, reqBody, nil)
+	defer tdb.DeleteRoomByRoomName(t, reqBody.Name)
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
@@ -120,7 +122,7 @@ func TestHandleMainNewRoom_LongName(t *testing.T) {
 	reqBody := RoomRegisterRequest{
 		Name: "very_long_room_name_for_real_12331313131331331123213231313131313131331",
 	}
-	w := handleNewRoomDecode(t, reqBody, &sessionString)
+	w := handleNewRoomEncode(t, reqBody, &sessionString)
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
@@ -140,6 +142,7 @@ func TestHandleMainNewRoom_ExtraFieldsJSON(t *testing.T) {
 
 	reqBody := `{"Name":"test room","id":123,"admin":true,"random_field":"hello"}`
 	w := handleNewRoomRaw(t, reqBody, &sessionString)
+	defer tdb.DeleteRoomByRoomName(t, "test room")
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusOK,

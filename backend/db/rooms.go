@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// Room represents a row in rooms table
+// It can be ised both for inserting or retrieving info from rooms table
 type Room struct {
 	ID   int
 	Name string
@@ -42,6 +44,8 @@ func (db *DB) getRoomByRoomID(ctx context.Context, roomID int) (Room, error) {
 	return room, nil
 }
 
+// GetRoomsByRoomIDS recieves a slice of integers
+// And returns a slice of all the rooms in rooms table that match any of the ids
 func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int) ([]Room, error) {
 	var rooms []Room
 	for _, roomID := range roomIDS {

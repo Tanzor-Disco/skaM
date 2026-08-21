@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+// handleMainRooms handles /api/main/rooms requests.
+// It gets the session string from the request, retrieves the user ID
+// from user_sessions, gets the user's room IDs,
+// and retrieves the room information from rooms.
+// If successful, it sends []Room to frontend.
 func (s *server) handleMainRooms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	cookie, err := r.Cookie("session_string")
