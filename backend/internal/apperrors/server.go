@@ -4,8 +4,10 @@ import (
 	"errors"
 )
 
+var ErrInvalidRoomNameLength = errors.New("invalid room name length")
 var ErrInvalidEmail = errors.New("invalid email format")
 var ErrInvalidEmailLength = errors.New("invalid email length")
+var ErrEmailTaken = errors.New("email already taken")
 var ErrInvalidJSON = errors.New("invalid JSON")
 var ErrInvalidPasswordChars = errors.New("forbidden password characters")
 var ErrInvalidPasswordLength = errors.New("invalid password length")
@@ -14,15 +16,16 @@ var ErrTokenCreation = errors.New("Failed to create a token")
 
 // KindErrors are used as part of JSON sent to frontend from server to add extra context
 const (
-	KindErrHashingPassword        = "ERR_HASHING_PASSWORD"
+	KindErrInternal               = "ERR_INTERNAL"
+	KindErrWrongLoginData         = "ERR_WRONG_LOGIN_DATA"
+	KindErrUnauthorized           = "ERR_UNAUTHORIZED"
+	KindErrNoSessionString        = "ERR_NO_SESSION_STRING"
+	KindErrInvalidRoomNameLength  = "ERR_INVALID_ROOM_NAME_LENGTH"
 	KindErrEmailTaken             = "ERR_EMAIL_TAKEN"
-	KindErrDB                     = "ERR_DB"
 	KindErrInvalidEmail           = "ERR_INVALID_EMAIL"
 	KindErrInvalidEmailLength     = "ERR_INVALID_EMAIL_LENGTH"
 	KindErrInvalidUsernameLength  = "ERR_INVALID_USERNAME_LENGTH"
 	KindErrForbiddenPasswordChars = "ERR_FORBIDDEN_PASSWORD_CHARS"
 	KindErrInvalidPasswordLength  = "ERR_INVALID_PASSWORD_LENGTH"
-	KindErrTokenCreation          = "ERR_TOKEN_CREATION"
-	KindErrSendingEmail           = "ERR_SENDING_EMAIL"
 	KindErrNone                   = "ERR_NONE"
 )

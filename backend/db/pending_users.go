@@ -46,11 +46,11 @@ func (db *DB) deleteExpired() error {
 }
 
 func (db *DB) PeriodicPendingDelete() {
-	for {
+	ticker := time.NewTicker(time.Hour * 1)
+	for range ticker.C {
 		err := db.deleteExpired()
 		if err != nil {
 			log.Printf("failed to delete expired users from pending: %v", err)
 		}
-		time.Sleep(1 * time.Hour)
 	}
 }

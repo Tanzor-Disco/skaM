@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/Tanzor-Disco/skaM/db"
 	"log"
 	"os"
 
