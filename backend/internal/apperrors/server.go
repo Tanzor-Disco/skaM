@@ -19,7 +19,7 @@ const (
 	KindErrInternal               = "ERR_INTERNAL"
 	KindErrWrongLoginData         = "ERR_WRONG_LOGIN_DATA"
 	KindErrUnauthorized           = "ERR_UNAUTHORIZED"
-	KindErrNoSessionString        = "ERR_NO_SESSION_STRING"
+	KindErrInvalidSessionString   = "ERR_INVALID_SESSION_STRING"
 	KindErrInvalidRoomNameLength  = "ERR_INVALID_ROOM_NAME_LENGTH"
 	KindErrEmailTaken             = "ERR_EMAIL_TAKEN"
 	KindErrInvalidEmail           = "ERR_INVALID_EMAIL"

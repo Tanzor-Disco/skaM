@@ -67,6 +67,7 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/register", server.handleRegister)
 	http.HandleFunc("/api/verify/email/", server.addUserToMainDB)
 	http.HandleFunc("/api/login", server.handleLogin)
+	http.HandleFunc("/api/main", server.handleMain)
 	http.HandleFunc("/api/main/new/room", server.handleMainNewRoom)
 	http.HandleFunc("/api/main/rooms", server.handleMainRooms)
 	http.HandleFunc("/api/root", server.handleRoot)

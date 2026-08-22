@@ -13,29 +13,13 @@ import (
 // If successful, it sends []Room to frontend.
 func (s *server) handleMainRooms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	cookie, err := r.Cookie("session_string")
-	if err == http.ErrNoCookie {
-		log.Printf("handleMain: r.Cookie: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrNoSessionString, nil)
+	userSession, err := s.getUserSession(r)
+	if err != nil {
+		log.Printf("getUserSession: %v", err)
+		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
-
-	if err != nil {
-		log.Printf("handleMain: r.Cookie: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
-		sendJSON(w, http.StatusInternalServerError, body)
-		return
-	}
-
-	userSession, err := s.db.GetUserSessionBySessionString(ctx, cookie.Value)
-	if err != nil {
-		log.Printf("handleMain: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
-		sendJSON(w, http.StatusInternalServerError, body)
-		return
-	}
-
 	roomIDS, err := s.db.GetRoomIDSByUserID(ctx, userSession.UserID)
 	if err != nil {
 		log.Printf("handleMain: %v", err)

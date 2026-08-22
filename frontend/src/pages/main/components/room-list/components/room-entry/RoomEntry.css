@@ -3,6 +3,7 @@
     flex-direction: row;
     gap: 3px;
     background-color: var(--bright-dark);
+    border: 1px solid var(--border-color);
     width: 300px;
     align-items: center;
 }

@@ -78,7 +78,7 @@ func TestHandleMainRooms_No_SessionString(t *testing.T) {
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
 		Success:     false,
-		ErrKind:     apperrors.KindErrNoSessionString,
+		ErrKind:     apperrors.KindErrInvalidSessionString,
 		CookieExist: false,
 	}
 	verifyResponse(t, w, wanted)

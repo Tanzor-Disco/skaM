@@ -23,7 +23,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	userSession, err := s.getUserSession(r)
 	if err != nil {
 		log.Printf("getUserSession: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}

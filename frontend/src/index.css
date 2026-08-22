@@ -1,9 +1,10 @@
 :root {
     --background: #18181b;
-    --bright-dark: #202020;
+    --bright-dark: #1e1e21;
+    --border-color: #29292d;
     --text: white;
-    --accent-dark: #29501e;
     --accent: #356a28;
+    --accent-dark: #29501e;
     --surface: #2c2c2c;
     --error: #b91c1c;
 }
@@ -24,7 +25,7 @@ p {
 }
 
 h1 {
-    font-weight: 800;
+    font-weight: 600;
     font-size: 2rem;
     color: var(--text);
 }
@@ -66,6 +67,7 @@ input {
     color: var(--text);
     font-size: 1.2rem;
     padding: 5px;
+    outline: none;
 }
 
 a {

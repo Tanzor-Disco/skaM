@@ -15,8 +15,10 @@ export default function RoomListHeader({ setRooms }: RoomListHeaderProps) {
     return (
         <>
             <header className="room-list-header">
-                <h1>Home</h1>
-                <button onClick={handleClick}>Add a room</button>
+                <h1 className="room-list-header-heading">Home</h1>
+                <button className="create-room-button" onClick={handleClick}>
+                    Create a room
+                </button>
             </header>
             {roomRegisterVisible && (
                 <RoomRegister

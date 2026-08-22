@@ -38,14 +38,14 @@ export default function RoomRegister({
             }
             return
         }
-		if (typeof formObj.name == 'string') {
-			const room = newRoom(responseObj.data[0], formObj.name)
-			setRooms((prevRooms) => [...prevRooms, room])
-		} else {
-			console.warn("new entry couldn't be created: wrong type")
-		}
+        if (typeof formObj.name == 'string') {
+            const room = newRoom(responseObj.data[0], formObj.name)
+            setRooms((prevRooms) => [...prevRooms, room])
+        } else {
+            console.warn("new entry couldn't be created: wrong type")
+        }
         setWarning('')
-		setRoomRegisterVisible(false)
+        setRoomRegisterVisible(false)
     }
 
     return (

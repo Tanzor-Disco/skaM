@@ -2,4 +2,12 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.room-list {
+    display: flex;
+    flex-direction: column;
+    height: 98vh;
 }

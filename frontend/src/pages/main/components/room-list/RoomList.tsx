@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import './RoomList.css'
 
 import RoomEntry from './components/room-entry/RoomEntry'
@@ -6,7 +6,11 @@ import RoomListHeader from './components/room-header/RoomListHeader'
 import logo from '@/assets/logo.svg'
 import type { Room } from '@/models/Room'
 
-export default function RoomList() {
+interface RoomListProps {
+    setCurrentRoom: Dispatch<SetStateAction<Room | null>>
+}
+
+export default function RoomList({ setCurrentRoom }: RoomListProps) {
     const [rooms, setRooms] = useState<Room[]>([])
     useEffect(() => {
         async function getRooms() {
@@ -16,12 +20,21 @@ export default function RoomList() {
             }
             const srvRooms = await response.json()
             setRooms(srvRooms.data)
+            setCurrentRoom(srvRooms.data[0])
         }
         getRooms()
     }, [])
 
     const roomComponents = rooms.map((room: Room) => {
-        return <RoomEntry key={room.ID} roomIcon={logo} roomTitle={room.Name} />
+        return (
+            <RoomEntry
+                key={room.ID}
+                roomID={room.ID}
+                roomIcon={logo}
+                roomTitle={room.Name}
+                setCurrentRoom={setCurrentRoom}
+            />
+        )
     })
 
     return (

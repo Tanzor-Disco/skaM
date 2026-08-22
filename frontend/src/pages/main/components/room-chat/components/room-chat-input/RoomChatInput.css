@@ -1,0 +1,12 @@
+.room-chat-input {
+    width: 50%;
+    height: 40px;
+}
+
+.room-chat-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}

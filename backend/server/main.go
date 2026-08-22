@@ -2,9 +2,11 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Tanzor-Disco/skaM/db"
+	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 )
 
 func (s *server) getUserSession(r *http.Request) (db.UserSession, error) {
@@ -18,4 +20,16 @@ func (s *server) getUserSession(r *http.Request) (db.UserSession, error) {
 		return db.UserSession{}, fmt.Errorf("GetUserSessionBySessionString: %w", err)
 	}
 	return userSession, nil
+}
+
+func (s *server) handleMain(w http.ResponseWriter, r *http.Request) {
+	userSession, err := s.getUserSession(r)
+	if err != nil {
+		log.Printf("getUserSession: %v", err)
+		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
+		sendJSON(w, http.StatusUnauthorized, body)
+		return
+	}
+	body := newServerResponseBody(false, apperrors.KindErrNone, []int{userSession.ID})
+	sendJSON(w, http.StatusOK, body)
 }
