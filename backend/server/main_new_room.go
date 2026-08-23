@@ -64,6 +64,6 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// returning one member slice with room id for frontend to create a room instance
-	body := newServerResponseBody(true, apperrors.KindErrNone, []int{roomID})
+	body := newServerResponseBody(true, apperrors.KindErrNone, []int64{roomID})
 	sendJSON(w, http.StatusOK, body)
 }

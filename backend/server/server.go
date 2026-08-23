@@ -29,7 +29,7 @@ func newServer(serverData models.ServerData) (*server, error) {
 type serverResponseBody[T any] struct {
 	Success   bool   `json:"success"`
 	ErrorKind string `json:"error_kind"`
-	Data      []T    `json:"data,omitempty"`
+	Data      []T    `json:"data"`
 }
 
 // newServerResponseBody creates an instance of serverResponseBody
@@ -71,6 +71,8 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/main/new/room", server.handleMainNewRoom)
 	http.HandleFunc("/api/main/rooms", server.handleMainRooms)
 	http.HandleFunc("/api/root", server.handleRoot)
+	http.HandleFunc("/api/main/messages", server.handleMainMessages)
+	http.HandleFunc("/api/main/new/message", server.handleMainNewMessage)
 
 	go server.db.PeriodicPendingDelete()
 	go server.db.PeriodicDeleteAllExpiredSessions()

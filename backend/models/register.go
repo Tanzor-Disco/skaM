@@ -14,7 +14,7 @@ type RegisterRequest struct {
 // User represents a record in the users table
 // It is used to create a new record in users table or retrieve data from it
 type User struct {
-	Id             int
+	Id             int64
 	Email          string
 	Username       string
 	PasswordHash   string
@@ -36,7 +36,7 @@ func NewUser(email, username, passwordHash string) User {
 // PendingUser represents a record in pending_users table
 // It is used to create a new record in pending_users table or retrieve data from it
 type PendingUser struct {
-	Id           int
+	Id           int64
 	Email        string
 	Username     string
 	PasswordHash string

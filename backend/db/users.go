@@ -61,3 +61,17 @@ func (db *DB) GetUserByEmail(email string) (models.User, error) {
 	}
 	return user, err
 }
+
+func (db *DB) GetUserByID(ctx context.Context, userID int64) (models.User, error) {
+	var user models.User
+	err := db.pool.QueryRow(ctx,
+		`
+		SELECT * FROM users WHERE id = $1
+		`,
+		userID).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = apperrors.ErrUserNotFound
+	}
+	return user, err
+
+}

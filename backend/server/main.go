@@ -30,6 +30,6 @@ func (s *server) handleMain(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
-	body := newServerResponseBody(false, apperrors.KindErrNone, []int{userSession.ID})
+	body := newServerResponseBody(false, apperrors.KindErrNone, []int64{userSession.ID})
 	sendJSON(w, http.StatusOK, body)
 }

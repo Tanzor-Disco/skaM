@@ -6,11 +6,11 @@ import (
 )
 
 type RoomUser struct {
-	RoomID int
-	UserID int
+	RoomID int64
+	UserID int64
 }
 
-func NewRoomUser(roomID, userID int) RoomUser {
+func NewRoomUser(roomID, userID int64) RoomUser {
 	return RoomUser{
 		RoomID: roomID,
 		UserID: userID,
@@ -28,21 +28,21 @@ func (db *DB) AddUserToRoom(ctx context.Context, roomUser RoomUser) error {
 	return err
 }
 
-func (db *DB) GetRoomIDSByUserID(ctx context.Context, userID int) ([]int, error) {
+func (db *DB) GetRoomIDSByUserID(ctx context.Context, userID int64) ([]int64, error) {
 	rows, err := db.pool.Query(ctx,
 		`
 	SELECT room_id FROM room_users WHERE user_id = $1
 	`,
 		userID)
 	if err != nil {
-		return make([]int, 0), fmt.Errorf("GetRoomIDSByUserID: %w", err)
+		return make([]int64, 0), fmt.Errorf("GetRoomIDSByUserID: %w", err)
 	}
-	var roomIDS []int
+	var roomIDS []int64
 	for rows.Next() {
-		var roomID int
+		var roomID int64
 		err := rows.Scan(&roomID)
 		if err != nil {
-			return make([]int, 0), fmt.Errorf("GetRoomIDSByUserID: %w", err)
+			return make([]int64, 0), fmt.Errorf("GetRoomIDSByUserID: %w", err)
 		}
 		roomIDS = append(roomIDS, roomID)
 	}

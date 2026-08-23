@@ -12,7 +12,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func createUserSessionRooms(t *testing.T, user models.User, rooms []db.Room) (userID int, sessionString string, roomIDs []int) {
+func createUserSessionRooms(t *testing.T, user models.User, rooms []db.Room) (userID int64, sessionString string, roomIDs []int64) {
 	t.Helper()
 	ctx := context.Background()
 	err := database.CreateUser(ctx, user)

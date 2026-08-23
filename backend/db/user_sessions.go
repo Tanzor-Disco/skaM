@@ -8,13 +8,13 @@ import (
 )
 
 type UserSession struct {
-	ID            int
-	UserID        int
+	ID            int64
+	UserID        int64
 	SessionString string
 	ExpiresAt     time.Time
 }
 
-func NewUserSession(userID int, sessionString string) UserSession {
+func NewUserSession(userID int64, sessionString string) UserSession {
 	return UserSession{
 		ID:            0,
 		UserID:        userID,

@@ -13,7 +13,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func createUserAndSession(t *testing.T, user models.User) (userEmail, sessionString string, userID int) {
+func createUserAndSession(t *testing.T, user models.User) (userEmail, sessionString string, userID int64) {
 	t.Helper()
 	err := database.CreateUser(context.Background(), user)
 	if err != nil {

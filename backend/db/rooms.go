@@ -18,8 +18,8 @@ func NewRoom(name string) Room {
 	}
 }
 
-func (db *DB) CreateRoom(ctx context.Context, room Room) (int, error) {
-	var roomID int
+func (db *DB) CreateRoom(ctx context.Context, room Room) (int64, error) {
+	var roomID int64
 	err := db.pool.QueryRow(context.Background(),
 		`
 	INSERT INTO rooms (room_name)
@@ -31,7 +31,7 @@ func (db *DB) CreateRoom(ctx context.Context, room Room) (int, error) {
 	return roomID, err
 }
 
-func (db *DB) getRoomByRoomID(ctx context.Context, roomID int) (Room, error) {
+func (db *DB) getRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
 	var room Room
 	err := db.pool.QueryRow(ctx,
 		`
@@ -46,7 +46,7 @@ func (db *DB) getRoomByRoomID(ctx context.Context, roomID int) (Room, error) {
 
 // GetRoomsByRoomIDS recieves a slice of integers
 // And returns a slice of all the rooms in rooms table that match any of the ids
-func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int) ([]Room, error) {
+func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int64) ([]Room, error) {
 	var rooms []Room
 	for _, roomID := range roomIDS {
 		room, err := db.getRoomByRoomID(ctx, roomID)

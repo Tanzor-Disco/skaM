@@ -8,7 +8,7 @@ import type { Room } from '@/models/Room'
 
 export default function Main() {
     const navigate = useNavigate()
-    let userID: number | null = null
+    const [userID, setUserID] = useState(0)
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null)
     useEffect(() => {
         async function getUserData() {
@@ -18,14 +18,16 @@ export default function Main() {
                 return
             }
             const body = await response.json()
-            userID = body.data[0]
+            setUserID(body.data[0])
         }
         getUserData()
     })
     return (
         <main className="page-main">
             <RoomList setCurrentRoom={setCurrentRoom} />
-            {currentRoom && <RoomChat currentRoom={currentRoom} />}
+            {currentRoom && userID && (
+                <RoomChat currentRoom={currentRoom} userID={userID} />
+            )}
         </main>
     )
 }

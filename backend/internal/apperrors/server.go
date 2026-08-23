@@ -28,4 +28,6 @@ const (
 	KindErrForbiddenPasswordChars = "ERR_FORBIDDEN_PASSWORD_CHARS"
 	KindErrInvalidPasswordLength  = "ERR_INVALID_PASSWORD_LENGTH"
 	KindErrNone                   = "ERR_NONE"
+	KindErrInvalidQueryParam      = "ERR_INVALID_QUERY_PARAMETER"
+	KindErrInvalidJSON            = "ERR_INVALID_JSON"
 )

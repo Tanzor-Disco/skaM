@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func (tdb *TestDB) DeleteSessionsByUserID(t *testing.T, id int) {
+func (tdb *TestDB) DeleteSessionsByUserID(t *testing.T, id int64) {
 	t.Helper()
 	_, err := tdb.pool.Exec(context.Background(),
 		`
