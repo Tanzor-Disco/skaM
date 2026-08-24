@@ -19,6 +19,9 @@ export default function RoomList({ setCurrentRoom }: RoomListProps) {
                 return []
             }
             const srvRooms = await response.json()
+            if (srvRooms.data === null) {
+                return
+            }
             setRooms(srvRooms.data)
             setCurrentRoom(srvRooms.data[0])
         }

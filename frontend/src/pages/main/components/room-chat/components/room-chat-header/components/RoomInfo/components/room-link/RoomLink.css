@@ -1,0 +1,14 @@
+.room-link {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.room-link-text {
+    font-size: 1.2rem;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+}

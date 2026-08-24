@@ -51,12 +51,12 @@ func getEmailBody(baseURL string, token string) (string, error) {
 }
 
 // SendEmail uses go SMTP module to send a verification email to a specified user
-func SendEmail(token, to string, data models.SMTPData) error {
+func SendEmail(token, to, baseURL string, data models.SMTPData) error {
 	var auth smtp.Auth
 	if data.Username != "" && data.Password != "" {
 		auth = smtp.PlainAuth("", data.Username, data.Password, data.Host)
 	}
-	body, err := getEmailBody(data.BaseURL, token)
+	body, err := getEmailBody(baseURL, token)
 	if err != nil {
 		return err
 	}

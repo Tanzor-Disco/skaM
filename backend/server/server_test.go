@@ -59,8 +59,8 @@ func runSMTPServer() *exec.Cmd {
 
 func createServerData(testURI string) *server {
 	TestBaseURL := "http://localhost:8080"
-	TestSMTPData := models.NewSMTPData("", "", "localhost", "localhost:1025", "test@example.com", TestBaseURL)
-	TestServerData := models.NewServerData(testURI, TestSMTPData)
+	TestSMTPData := models.NewSMTPData("", "", "localhost", "localhost:1025", "test@example.com")
+	TestServerData := models.NewServerData(testURI, TestBaseURL, TestSMTPData)
 	srv, err := newServer(TestServerData)
 	if err != nil {
 		log.Fatal(err)

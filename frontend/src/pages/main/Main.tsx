@@ -25,9 +25,7 @@ export default function Main() {
     return (
         <main className="page-main">
             <RoomList setCurrentRoom={setCurrentRoom} />
-            {currentRoom && userID && (
-                <RoomChat currentRoom={currentRoom} userID={userID} />
-            )}
+            {currentRoom && <RoomChat currentRoom={currentRoom} />}
         </main>
     )
 }

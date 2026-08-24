@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Tanzor-Disco/skaM/check/invite"
 	"github.com/Tanzor-Disco/skaM/check/validate"
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
@@ -49,6 +50,22 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	roomID, err := s.db.CreateRoom(ctx, room)
 	if err != nil {
 		log.Printf("CreateRoom: %v", err)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		sendJSON(w, http.StatusInternalServerError, body)
+		return
+	}
+
+	inviteToken, err := invite.CreateInviteToken()
+	if err != nil {
+		log.Printf("handleMainNewRoom: %v", err)
+		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		sendJSON(w, http.StatusInternalServerError, body)
+		return
+	}
+
+	roomInvite := db.NewRoomInvite(roomID, inviteToken)
+	if err = s.db.CreateRoomInvite(ctx, roomInvite); err != nil {
+		log.Printf("handleMainNewRoom: %v", err)
 		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return

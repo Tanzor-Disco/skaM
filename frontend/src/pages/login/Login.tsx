@@ -8,7 +8,7 @@ export default function Login() {
     return (
         <main>
             <div className="page-login">
-                <img src={logo} className="site-logo" />
+                <img src={logo} className="login-site-logo" />
                 <LoginForm setInvalidInput={setInvalidInput} />
                 <div className="login-link">
                     <p> Don't have an account ?</p>

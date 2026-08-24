@@ -48,3 +48,17 @@ func (db *DB) GetRoomIDSByUserID(ctx context.Context, userID int64) ([]int64, er
 	}
 	return roomIDS, nil
 }
+
+func (db *DB) ValidateRoomUser(ctx context.Context, userID, roomID int64) error {
+	var exists int
+	err := db.pool.QueryRow(ctx,
+		`
+	SELECT 1 FROM room_users 
+	WHERE user_id = $1 AND room_id = $2
+	`,
+		userID, roomID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("ValidateRoomUser: %w", err)
+	}
+	return nil
+}

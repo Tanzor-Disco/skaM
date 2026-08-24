@@ -11,6 +11,7 @@ import (
 type server struct {
 	db       *db.DB
 	SMTPData models.SMTPData
+	baseURL  string
 }
 
 // newServer creates a new server instance that stores db struct and SMTPData
@@ -22,6 +23,7 @@ func newServer(serverData models.ServerData) (*server, error) {
 	return &server{
 		db:       db,
 		SMTPData: serverData.SMTPData,
+		baseURL:  serverData.BaseURL,
 	}, nil
 }
 
@@ -73,6 +75,7 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/root", server.handleRoot)
 	http.HandleFunc("/api/main/messages", server.handleMainMessages)
 	http.HandleFunc("/api/main/new/message", server.handleMainNewMessage)
+	http.HandleFunc("/api/main/room/invite", server.handleMainRoomInvite)
 
 	go server.db.PeriodicPendingDelete()
 	go server.db.PeriodicDeleteAllExpiredSessions()

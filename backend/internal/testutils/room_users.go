@@ -2,8 +2,8 @@ package testutils
 
 import (
 	"context"
-	"testing"
 	"log"
+	"testing"
 )
 
 func (tdb *TestDB) DeleteRoomUsersByUserID(t *testing.T, userID int64) {
@@ -17,5 +17,3 @@ func (tdb *TestDB) DeleteRoomUsersByUserID(t *testing.T, userID int64) {
 		t.Fatalf("DeleteRoomUsersByUserID: %v", err)
 	}
 }
-
-
