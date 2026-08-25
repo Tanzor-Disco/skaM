@@ -5,6 +5,7 @@ import Login from './pages/login/Login'
 import Register from './pages/register/Register'
 import Main from './pages/main/Main'
 import Root from './pages/root/Root'
+import InviteInfo from './pages/invite/InviteInfo'
 
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/" element={<Root />} />
                 <Route path="/main" element={<Main />} />
+                <Route path="invite" element={<InviteInfo />} />
             </Routes>
         </BrowserRouter>
     )

@@ -13,6 +13,7 @@ var ErrInvalidPasswordChars = errors.New("forbidden password characters")
 var ErrInvalidPasswordLength = errors.New("invalid password length")
 var ErrInvalidUsernameLength = errors.New("invalid username length")
 var ErrTokenCreation = errors.New("Failed to create a token")
+var ErrUniqueViolation = errors.New("SQL unique constraints violation")
 
 // KindErrors are used as part of JSON sent to frontend from server to add extra context
 const (
@@ -30,4 +31,6 @@ const (
 	KindErrNone                   = "ERR_NONE"
 	KindErrInvalidQueryParam      = "ERR_INVALID_QUERY_PARAMETER"
 	KindErrInvalidJSON            = "ERR_INVALID_JSON"
+	KindErrInvalidInviteToken     = "ERR_INVALID_INVITE_TOKEN"
+	KindErrUniqueViolation        = "ERR_UNIQUE_VIOLATION"
 )

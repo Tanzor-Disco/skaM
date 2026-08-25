@@ -3,9 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
-)
-
-// Room represents a row in rooms table
+) // Room represents a row in rooms table
 // It can be ised both for inserting or retrieving info from rooms table
 type Room struct {
 	ID   int
@@ -31,7 +29,7 @@ func (db *DB) CreateRoom(ctx context.Context, room Room) (int64, error) {
 	return roomID, err
 }
 
-func (db *DB) getRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
+func (db *DB) GetRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
 	var room Room
 	err := db.pool.QueryRow(ctx,
 		`
@@ -49,7 +47,7 @@ func (db *DB) getRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
 func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int64) ([]Room, error) {
 	var rooms []Room
 	for _, roomID := range roomIDS {
-		room, err := db.getRoomByRoomID(ctx, roomID)
+		room, err := db.GetRoomByRoomID(ctx, roomID)
 		if err != nil {
 			return make([]Room, 0), fmt.Errorf("GetRoomsByRoomIDS: %w", err)
 		}

@@ -2,7 +2,11 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type RoomUser struct {
@@ -25,6 +29,10 @@ func (db *DB) AddUserToRoom(ctx context.Context, roomUser RoomUser) error {
 	`,
 		roomUser.UserID, roomUser.RoomID,
 	)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return apperrors.ErrUniqueViolation
+	}
 	return err
 }
 

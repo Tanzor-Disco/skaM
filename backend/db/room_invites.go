@@ -44,3 +44,17 @@ func (db *DB) GetRoomInviteByroomID(ctx context.Context, roomID int64) (RoomInvi
 	}
 	return roomInvite, nil
 }
+
+func (db *DB) GetRoomInviteByInviteToken(ctx context.Context, inviteToken string) (RoomInvite, error) {
+	var roomInvite RoomInvite
+	err := db.pool.QueryRow(ctx,
+		`
+	SELECT * FROM room_invites
+	WHERE token = $1
+	`,
+		inviteToken).Scan(&roomInvite.ID, &roomInvite.RoomID, &roomInvite.Token)
+	if err != nil {
+		return roomInvite, fmt.Errorf("getRoomInviteByroomID: queryRow: %w", err)
+	}
+	return roomInvite, nil
+}

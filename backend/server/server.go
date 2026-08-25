@@ -76,6 +76,8 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/main/messages", server.handleMainMessages)
 	http.HandleFunc("/api/main/new/message", server.handleMainNewMessage)
 	http.HandleFunc("/api/main/room/invite", server.handleMainRoomInvite)
+	http.HandleFunc("/api/info/room", server.handleInfoRoom)
+	http.HandleFunc("/api/invite/add", server.handleInviteAdd)
 
 	go server.db.PeriodicPendingDelete()
 	go server.db.PeriodicDeleteAllExpiredSessions()

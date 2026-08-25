@@ -47,7 +47,7 @@ func (s *server) handleMainRoomInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inviteURL := s.baseURL + "/main/invite?token=" + roomInvite.Token
+	inviteURL := s.baseURL + "/invite?token=" + roomInvite.Token
 	body := newServerResponseBody(true, apperrors.KindErrNone, []string{inviteURL})
 	sendJSON(w, http.StatusOK, body)
 }

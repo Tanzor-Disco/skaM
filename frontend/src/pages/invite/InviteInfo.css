@@ -1,0 +1,21 @@
+.invite-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+
+.invite-img {
+    width: 200px;
+}
+
+.room-name {
+    max-width: 200px;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.join-button {
+    width: 200px;
+}
