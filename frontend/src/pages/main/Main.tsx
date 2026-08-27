@@ -8,7 +8,7 @@ import type { Room } from '@/models/Room'
 
 export default function Main() {
     const navigate = useNavigate()
-    const [userID, setUserID] = useState(0)
+    const [_, setUserID] = useState(0)
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null)
     useEffect(() => {
         async function getUserData() {

@@ -66,6 +66,8 @@ func Run(serverData models.ServerData) error {
 		return err
 	}
 
+	http.HandleFunc("/",handleStatic)
+
 	http.HandleFunc("/api/register", server.handleRegister)
 	http.HandleFunc("/api/verify/email/", server.addUserToMainDB)
 	http.HandleFunc("/api/login", server.handleLogin)

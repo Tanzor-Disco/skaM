@@ -1,0 +1,30 @@
+services:
+  backend:
+    image: skam-backend:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - back-tier
+    env_file:
+      - ./.env_prod
+    depends_on:
+      postgres:
+          condition: service_healthy
+
+  postgres:
+    image: postgres:18
+    networks:
+      - back-tier
+    env_file:
+      - ./.env_postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d skaM"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data:
+networks:
+  back-tier: {}
