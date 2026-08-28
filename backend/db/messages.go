@@ -2,32 +2,19 @@ package db
 
 import (
 	"context"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-type Message struct {
-	Id     int
-	UserId int64
-	RoomId int64
-	Text   string
-}
-
-func NewMessage(userID, roomID int64, text string) Message {
-	return Message{
-		UserId: userID,
-		RoomId: roomID,
-		Text:   text,
-	}
-}
-
+// messageData is used to transport the message info to frontend
 type MessageData struct {
-	ID     int64
-	UserID int64
-	RoomID int64
+	ID     models.MessageID
+	UserID models.UserID
+	RoomID models.RoomID
 	Text   string
 	Author string
 }
 
-func NewMessageData(ID, userID, roomID int64, text string, author string) MessageData {
+func NewMessageData(ID models.MessageID, userID models.UserID, roomID models.RoomID, text string, author string) MessageData {
 	return MessageData{
 		ID:     ID,
 		UserID: userID,
@@ -37,8 +24,8 @@ func NewMessageData(ID, userID, roomID int64, text string, author string) Messag
 	}
 }
 
-func (db *DB) CreateMessage(ctx context.Context, message Message) (int64, error) {
-	var messageID int64
+func (db *DB) CreateMessage(ctx context.Context, message models.Message) (models.MessageID, error) {
+	var messageID models.MessageID
 	err := db.pool.QueryRow(ctx,
 		`
 	INSERT INTO messages (user_id,room_id,message_text)
@@ -50,7 +37,7 @@ func (db *DB) CreateMessage(ctx context.Context, message Message) (int64, error)
 	return messageID, err
 }
 
-func (db *DB) GetMessageData(ctx context.Context, roomID int) ([]MessageData, error) {
+func (db *DB) GetMessageData(ctx context.Context, roomID models.RoomID) ([]MessageData, error) {
 	rows, err := db.pool.Query(ctx,
 		`
 	SELECT messages.*, users.username

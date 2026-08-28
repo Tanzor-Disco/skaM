@@ -7,10 +7,11 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 type MessageRegisterRequest struct {
-	RoomID int64
+	RoomID models.RoomID
 	Text   string
 }
 
@@ -33,7 +34,7 @@ func (s *server) handleMainNewMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := db.NewMessage(userSession.UserID, messageRequest.RoomID, messageRequest.Text)
+	message := models.NewMessage(userSession.UserID, messageRequest.RoomID, messageRequest.Text)
 	messageID, err := s.db.CreateMessage(ctx, message)
 	if err != nil {
 		log.Printf("CreateMessage: %v", err)

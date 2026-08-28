@@ -3,21 +3,12 @@ package db
 import (
 	"context"
 	"fmt"
-) // Room represents a row in rooms table
-// It can be ised both for inserting or retrieving info from rooms table
-type Room struct {
-	ID   int
-	Name string
-}
 
-func NewRoom(name string) Room {
-	return Room{
-		Name: name,
-	}
-}
+	"github.com/Tanzor-Disco/skaM/models"
+)
 
-func (db *DB) CreateRoom(ctx context.Context, room Room) (int64, error) {
-	var roomID int64
+func (db *DB) CreateRoom(ctx context.Context, room models.Room) (models.RoomID, error) {
+	var roomID models.RoomID
 	err := db.pool.QueryRow(context.Background(),
 		`
 	INSERT INTO rooms (room_name)
@@ -29,8 +20,8 @@ func (db *DB) CreateRoom(ctx context.Context, room Room) (int64, error) {
 	return roomID, err
 }
 
-func (db *DB) GetRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
-	var room Room
+func (db *DB) GetRoomByRoomID(ctx context.Context, roomID models.RoomID) (models.Room, error) {
+	var room models.Room
 	err := db.pool.QueryRow(ctx,
 		`
 	SELECT * FROM rooms WHERE id = $1
@@ -42,14 +33,14 @@ func (db *DB) GetRoomByRoomID(ctx context.Context, roomID int64) (Room, error) {
 	return room, nil
 }
 
-// GetRoomsByRoomIDS recieves a slice of integers
+// GetRoomsByRoomIDS recieves a slice of room ids
 // And returns a slice of all the rooms in rooms table that match any of the ids
-func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []int64) ([]Room, error) {
-	var rooms []Room
+func (db *DB) GetRoomsByRoomIDS(ctx context.Context, roomIDS []models.RoomID) ([]models.Room, error) {
+	var rooms []models.Room
 	for _, roomID := range roomIDS {
 		room, err := db.GetRoomByRoomID(ctx, roomID)
 		if err != nil {
-			return make([]Room, 0), fmt.Errorf("GetRoomsByRoomIDS: %w", err)
+			return make([]models.Room, 0), fmt.Errorf("GetRoomsByRoomIDS: %w", err)
 		}
 		rooms = append(rooms, room)
 	}

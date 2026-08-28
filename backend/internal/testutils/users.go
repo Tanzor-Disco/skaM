@@ -61,9 +61,9 @@ func (tdb *TestDB) GetAllUsers(t *testing.T) (userRows []models.User) {
 	return
 }
 
-func (tdb *TestDB) GetUserIDByEmail(t *testing.T, email string) int64 {
+func (tdb *TestDB) GetUserIDByEmail(t *testing.T, email string) models.UserID {
 	t.Helper()
-	var id int64
+	var id models.UserID
 	err := tdb.pool.QueryRow(context.Background(),
 		`
 	SELECT id FROM users WHERE email = $1

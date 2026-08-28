@@ -3,9 +3,11 @@ package testutils
 import (
 	"context"
 	"testing"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func (tdb *TestDB) DeleteSessionsByUserID(t *testing.T, id int64) {
+func (tdb *TestDB) DeleteSessionsByUserID(t *testing.T, id models.UserID) {
 	t.Helper()
 	_, err := tdb.pool.Exec(context.Background(),
 		`

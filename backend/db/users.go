@@ -62,7 +62,7 @@ func (db *DB) GetUserByEmail(email string) (models.User, error) {
 	return user, err
 }
 
-func (db *DB) GetUserByID(ctx context.Context, userID int64) (models.User, error) {
+func (db *DB) GetUserByID(ctx context.Context, userID models.UserID) (models.User, error) {
 	var user models.User
 	err := db.pool.QueryRow(ctx,
 		`
@@ -73,5 +73,4 @@ func (db *DB) GetUserByID(ctx context.Context, userID int64) (models.User, error
 		err = apperrors.ErrUserNotFound
 	}
 	return user, err
-
 }

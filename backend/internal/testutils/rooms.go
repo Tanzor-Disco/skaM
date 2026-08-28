@@ -3,9 +3,11 @@ package testutils
 import (
 	"context"
 	"testing"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func (tdb *TestDB) DeleteRoomByRoomID(t *testing.T, id int64) {
+func (tdb *TestDB) DeleteRoomByRoomID(t *testing.T, id models.RoomID) {
 	_, err := tdb.pool.Exec(context.Background(),
 		`
 	DELETE FROM rooms WHERE id = $1
@@ -16,7 +18,7 @@ func (tdb *TestDB) DeleteRoomByRoomID(t *testing.T, id int64) {
 	}
 }
 
-func (tdb *TestDB) DeleteRoomsByRoomIDs(t *testing.T, roomIDs []int64) {
+func (tdb *TestDB) DeleteRoomsByRoomIDs(t *testing.T, roomIDs []models.RoomID) {
 	for _, roomID := range roomIDs {
 		tdb.DeleteRoomByRoomID(t, roomID)
 	}

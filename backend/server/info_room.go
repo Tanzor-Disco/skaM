@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 func (s *server) handleInfoRoom(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +38,6 @@ func (s *server) handleInfoRoom(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
-	body := newServerResponseBody(false, apperrors.KindErrNone, []db.Room{room})
+	body := newServerResponseBody(false, apperrors.KindErrNone, []models.Room{room})
 	sendJSON(w, http.StatusOK, body)
 }

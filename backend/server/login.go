@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/Tanzor-Disco/skaM/auth"
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -63,7 +63,7 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
-	userSession := db.NewUserSession(userDB.Id, sessionString)
+	userSession := models.NewUserSession(userDB.Id, sessionString)
 	err = s.db.CreateSession(r.Context(), userSession)
 	if err != nil {
 		log.Printf("db: %v", err)

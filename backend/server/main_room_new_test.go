@@ -1,35 +1,19 @@
 package server
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Tanzor-Disco/skaM/auth"
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func createUserAndSession(t *testing.T, user models.User) (userEmail, sessionString string, userID int64) {
+func createUserAndSession(t *testing.T, user models.User) (sessionString string, userID models.UserID) {
 	t.Helper()
-	err := database.CreateUser(context.Background(), user)
-	if err != nil {
-		t.Fatalf("CreateUser: %v", err)
-	}
-	userID = tdb.GetUserIDByEmail(t, user.Email)
-	userEmail = user.Email
-	sessionString, err = auth.CreateSessionString()
-	if err != nil {
-		t.Fatalf("CreateSessionString: %v", err)
-	}
-	userSession := db.NewUserSession(userID, sessionString)
-	err = database.CreateSession(context.Background(), userSession)
-	if err != nil {
-		t.Fatalf("CreateSession: %v", err)
-	}
+	userID = createTestUser(t, user)
+	sessionString = createTestUserSession(t, userID)
 	return
 }
 
@@ -52,8 +36,8 @@ func handleNewRoomRaw(t *testing.T, body string, sessionString *string) *httptes
 func TestHandleMainNewRoom_Valid(t *testing.T) {
 	user := models.NewUser("email@test.com", "test_username", testutils.GetPasswordHash(t, "123"))
 
-	userEmail, sessionString, userID := createUserAndSession(t, user)
-	defer tdb.DeleteUsersByEmail(t, userEmail)
+	sessionString, userID := createUserAndSession(t, user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
 	reqBody := RoomRegisterRequest{
@@ -73,8 +57,8 @@ func TestHandleMainNewRoom_Valid(t *testing.T) {
 
 func TestHandleMainNewRoom_NoSession(t *testing.T) {
 	user := models.NewUser("email@test.com", "test_username", testutils.GetPasswordHash(t, "123"))
-	userEmail, _, userID := createUserAndSession(t, user)
-	defer tdb.DeleteUsersByEmail(t, userEmail)
+	_, userID := createUserAndSession(t, user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
 	reqBody := RoomRegisterRequest{
@@ -95,8 +79,8 @@ func TestHandleMainNewRoom_NoSession(t *testing.T) {
 func TestHandleMainNewRoom_NoJSON(t *testing.T) {
 	user := models.NewUser("email@test.com", "test_username", testutils.GetPasswordHash(t, "123"))
 
-	userEmail, sessionString, userID := createUserAndSession(t, user)
-	defer tdb.DeleteUsersByEmail(t, userEmail)
+	sessionString, userID := createUserAndSession(t, user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
 	reqBody := ""
@@ -115,8 +99,8 @@ func TestHandleMainNewRoom_NoJSON(t *testing.T) {
 func TestHandleMainNewRoom_LongName(t *testing.T) {
 	user := models.NewUser("email@test.com", "test_username", testutils.GetPasswordHash(t, "123"))
 
-	userEmail, sessionString, userID := createUserAndSession(t, user)
-	defer tdb.DeleteUsersByEmail(t, userEmail)
+	sessionString, userID := createUserAndSession(t, user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
 	reqBody := RoomRegisterRequest{
@@ -136,8 +120,8 @@ func TestHandleMainNewRoom_LongName(t *testing.T) {
 func TestHandleMainNewRoom_ExtraFieldsJSON(t *testing.T) {
 	user := models.NewUser("email@test.com", "test_username", testutils.GetPasswordHash(t, "123"))
 
-	userEmail, sessionString, userID := createUserAndSession(t, user)
-	defer tdb.DeleteUsersByEmail(t, userEmail)
+	sessionString, userID := createUserAndSession(t, user)
+	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
 	reqBody := `{"Name":"test room","id":123,"admin":true,"random_field":"hello"}`

@@ -3,22 +3,11 @@ package db
 import (
 	"context"
 	"fmt"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-type RoomInvite struct {
-	ID     int64
-	RoomID int64
-	Token  string
-}
-
-func NewRoomInvite(roomID int64, token string) RoomInvite {
-	return RoomInvite{
-		RoomID: roomID,
-		Token:  token,
-	}
-}
-
-func (db *DB) CreateRoomInvite(ctx context.Context, invite RoomInvite) error {
+func (db *DB) CreateRoomInvite(ctx context.Context, invite models.RoomInvite) error {
 	_, err := db.pool.Exec(ctx,
 		`
 	INSERT INTO room_invites (room_id,token)
@@ -31,8 +20,8 @@ func (db *DB) CreateRoomInvite(ctx context.Context, invite RoomInvite) error {
 	return nil
 }
 
-func (db *DB) GetRoomInviteByroomID(ctx context.Context, roomID int64) (RoomInvite, error) {
-	var roomInvite RoomInvite
+func (db *DB) GetRoomInviteByroomID(ctx context.Context, roomID models.RoomID) (models.RoomInvite, error) {
+	var roomInvite models.RoomInvite
 	err := db.pool.QueryRow(ctx,
 		`
 	SELECT * FROM room_invites
@@ -45,8 +34,8 @@ func (db *DB) GetRoomInviteByroomID(ctx context.Context, roomID int64) (RoomInvi
 	return roomInvite, nil
 }
 
-func (db *DB) GetRoomInviteByInviteToken(ctx context.Context, inviteToken string) (RoomInvite, error) {
-	var roomInvite RoomInvite
+func (db *DB) GetRoomInviteByInviteToken(ctx context.Context, inviteToken string) (models.RoomInvite, error) {
+	var roomInvite models.RoomInvite
 	err := db.pool.QueryRow(ctx,
 		`
 	SELECT * FROM room_invites

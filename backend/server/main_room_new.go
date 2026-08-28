@@ -7,8 +7,8 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/check/invite"
 	"github.com/Tanzor-Disco/skaM/check/validate"
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 type RoomRegisterRequest struct {
@@ -46,7 +46,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room := db.NewRoom(registerRequest.Name)
+	room := models.NewRoom(registerRequest.Name)
 	roomID, err := s.db.CreateRoom(ctx, room)
 	if err != nil {
 		log.Printf("CreateRoom: %v", err)
@@ -63,7 +63,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomInvite := db.NewRoomInvite(roomID, inviteToken)
+	roomInvite := models.NewRoomInvite(roomID, inviteToken)
 	if err = s.db.CreateRoomInvite(ctx, roomInvite); err != nil {
 		log.Printf("handleMainNewRoom: %v", err)
 		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
@@ -71,7 +71,7 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomUser := db.NewRoomUser(roomID, userSession.UserID)
+	roomUser := models.NewRoomUser(roomID, userSession.UserID)
 	err = s.db.AddUserToRoom(ctx, roomUser)
 	if err != nil {
 		log.Printf("AddUserToRoom: %v", err)
@@ -81,6 +81,6 @@ func (s *server) handleMainNewRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// returning one member slice with room id for frontend to create a room instance
-	body := newServerResponseBody(true, apperrors.KindErrNone, []int64{roomID})
+	body := newServerResponseBody(true, apperrors.KindErrNone, []models.RoomID{roomID})
 	sendJSON(w, http.StatusOK, body)
 }

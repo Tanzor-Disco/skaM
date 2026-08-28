@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 func (s *server) handleMainRoomInvite(w http.ResponseWriter, r *http.Request) {
@@ -32,14 +33,14 @@ func (s *server) handleMainRoomInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = s.db.ValidateRoomUser(ctx, userSession.UserID, roomID); err != nil {
+	if err = s.db.ValidateRoomUser(ctx, userSession.UserID, models.RoomID(roomID)); err != nil {
 		log.Printf("ValidateRoomUser: %v", err)
 		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
 
-	roomInvite, err := s.db.GetRoomInviteByroomID(ctx, roomID)
+	roomInvite, err := s.db.GetRoomInviteByroomID(ctx, models.RoomID(roomID))
 	if err != nil {
 		log.Printf("GetRoomInviteByroomID: %v", err)
 		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)

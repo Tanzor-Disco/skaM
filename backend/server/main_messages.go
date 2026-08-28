@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 func (s *server) handleMainMessages(w http.ResponseWriter, r *http.Request) {
@@ -16,14 +17,20 @@ func (s *server) handleMainMessages(w http.ResponseWriter, r *http.Request) {
 		body := newServerResponseBody[any](false, apperrors.KindErrInvalidQueryParam, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 	}
-	roomID, err := strconv.Atoi(roomIDString)
+	roomID, err := strconv.ParseInt(roomIDString, 10, 64)
 	if err != nil {
-		log.Printf("strconv.Atoi: %v", err)
+		log.Printf("handleMainMessages: ParseInt: %v", err)
 		body := newServerResponseBody[any](false, apperrors.KindErrInvalidQueryParam, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
-	messageData, err := s.db.GetMessageData(ctx, roomID)
+	messageData, err := s.db.GetMessageData(ctx, models.RoomID(roomID))
+	if err != nil {
+		log.Printf("handleMainMessages: GetMessageData: %v", err)
+		body := newServerResponseBody[any](false, apperrors.KindErrInvalidQueryParam, nil)
+		sendJSON(w, http.StatusBadRequest, body)
+		return
+	}
 	body := newServerResponseBody(false, apperrors.KindErrNone, messageData)
 	sendJSON(w, http.StatusOK, body)
 }

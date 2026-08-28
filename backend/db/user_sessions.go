@@ -5,25 +5,11 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-type UserSession struct {
-	ID            int64
-	UserID        int64
-	SessionString string
-	ExpiresAt     time.Time
-}
-
-func NewUserSession(userID int64, sessionString string) UserSession {
-	return UserSession{
-		ID:            0,
-		UserID:        userID,
-		SessionString: sessionString,
-		ExpiresAt:     time.Now().Add(7 * 24 * time.Hour),
-	}
-}
-
-func (db *DB) CreateSession(ctx context.Context, user UserSession) error {
+func (db *DB) CreateSession(ctx context.Context, user models.UserSession) error {
 	_, err := db.pool.Exec(ctx,
 		`
 	INSERT INTO user_sessions (user_id, session_string, expires_at)
@@ -36,8 +22,8 @@ func (db *DB) CreateSession(ctx context.Context, user UserSession) error {
 	return nil
 }
 
-func (db *DB) GetUserSessionBySessionString(ctx context.Context, sessionString string) (UserSession, error) {
-	var user UserSession
+func (db *DB) GetUserSessionBySessionString(ctx context.Context, sessionString string) (models.UserSession, error) {
+	var user models.UserSession
 	err := db.pool.QueryRow(ctx,
 		`
 	SELECT * FROM user_sessions
@@ -45,7 +31,7 @@ func (db *DB) GetUserSessionBySessionString(ctx context.Context, sessionString s
 	`,
 		sessionString).Scan(&user.ID, &user.UserID, &user.SessionString, &user.ExpiresAt)
 	if err != nil {
-		return UserSession{}, fmt.Errorf("getUserSessionBySessionString: %w", err)
+		return models.UserSession{}, fmt.Errorf("getUserSessionBySessionString: %w", err)
 	}
 	return user, nil
 }

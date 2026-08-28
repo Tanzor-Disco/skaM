@@ -5,19 +5,19 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func (s *server) getUserSession(r *http.Request) (db.UserSession, error) {
+func (s *server) getUserSession(r *http.Request) (models.UserSession, error) {
 	cookie, err := r.Cookie("session_string")
 	if err != nil {
-		return db.UserSession{}, fmt.Errorf("r.Cookie: %w", err)
+		return models.UserSession{}, fmt.Errorf("r.Cookie: %w", err)
 	}
 	sessionString := cookie.Value
 	userSession, err := s.db.GetUserSessionBySessionString(r.Context(), sessionString)
 	if err != nil {
-		return db.UserSession{}, fmt.Errorf("GetUserSessionBySessionString: %w", err)
+		return models.UserSession{}, fmt.Errorf("GetUserSessionBySessionString: %w", err)
 	}
 	return userSession, nil
 }
@@ -30,6 +30,6 @@ func (s *server) handleMain(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
-	body := newServerResponseBody(false, apperrors.KindErrNone, []int64{userSession.ID})
+	body := newServerResponseBody(false, apperrors.KindErrNone, []models.UserSessionID{userSession.ID})
 	sendJSON(w, http.StatusOK, body)
 }

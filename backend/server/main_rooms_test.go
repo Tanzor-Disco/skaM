@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/Tanzor-Disco/skaM/auth"
-	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func createUserSessionRooms(t *testing.T, user models.User, rooms []db.Room) (userID int64, sessionString string, roomIDs []int64) {
+func createUserSessionRooms(t *testing.T, user models.User, rooms []models.Room) (userID models.UserID, sessionString string, roomIDs []models.RoomID) {
 	t.Helper()
 	ctx := context.Background()
 	err := database.CreateUser(ctx, user)
@@ -24,7 +23,7 @@ func createUserSessionRooms(t *testing.T, user models.User, rooms []db.Room) (us
 	if err != nil {
 		t.Fatalf("createUserSessionRooms: %v", err)
 	}
-	userSession := db.NewUserSession(userID, sessionString)
+	userSession := models.NewUserSession(userID, sessionString)
 	err = database.CreateSession(ctx, userSession)
 	if err != nil {
 		t.Fatalf("CreateSession: %v", err)
@@ -38,7 +37,7 @@ func createUserSessionRooms(t *testing.T, user models.User, rooms []db.Room) (us
 		roomIDs = append(roomIDs, roomID)
 	}
 	for _, roomID := range roomIDs {
-		roomUser := db.NewRoomUser(roomID, userID)
+		roomUser := models.NewRoomUser(roomID, userID)
 		database.AddUserToRoom(ctx, roomUser)
 	}
 	return
@@ -52,11 +51,10 @@ func handleRooms(t *testing.T, sessionString *string) *httptest.ResponseRecorder
 }
 
 func TestHandleMainRooms_Valid(t *testing.T) {
-	rooms := []db.Room{
+	rooms := []models.Room{
 		{ID: 0, Name: "test_room_1"},
 		{ID: 0, Name: "test_room_2"},
-		{ID: 0, Name: "test_room_3"},
-	}
+		{ID: 0, Name: "test_room_3"}}
 	user := models.NewUser("email@test.com", "test_user", "123")
 	userID, sessionString, roomIDs := createUserSessionRooms(t, user, rooms)
 	defer tdb.DeleteUsersByEmail(t, user.Email)
@@ -85,7 +83,7 @@ func TestHandleMainRooms_No_SessionString(t *testing.T) {
 }
 
 func TestHandleMainRooms_No_Rooms(t *testing.T) {
-	rooms := []db.Room{}
+	rooms := []models.Room{}
 	user := models.NewUser("email@test.com", "test_user", "123")
 	userID, sessionString, roomIDs := createUserSessionRooms(t, user, rooms)
 	defer tdb.DeleteUsersByEmail(t, user.Email)

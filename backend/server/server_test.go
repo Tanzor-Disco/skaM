@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -152,5 +153,51 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 	cookie := cookies[0]
 	if cookie.Name != "session_string" {
 		t.Fatalf("verifyResponse: cookie name mismatch:\n got %v\n wanted %v", cookie.Name, "session_string")
+	}
+}
+
+// creates a row in users table
+// should be cleaned up with defer
+func createTestUser(t *testing.T, user models.User) (userID models.UserID) {
+	t.Helper()
+	if err := database.CreateUser(context.Background(), user); err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	userID = tdb.GetUserIDByEmail(t, user.Email)
+	return
+}
+
+// creates a row in user_sessions table
+// should be cleaned up with defer
+func createTestUserSession(t *testing.T, userID models.UserID) (sessionString string) {
+	t.Helper()
+	sessionString, err := auth.CreateSessionString()
+	if err != nil {
+		t.Fatalf("CreateSessionString: %v", err)
+	}
+	userSession := models.NewUserSession(userID, sessionString)
+	if err = database.CreateSession(context.Background(), userSession); err != nil {
+		t.Fatalf("CreateSession: %v", err)
+	}
+	return
+}
+
+func createTestRoom(t *testing.T, room models.Room) (roomID models.RoomID) {
+	roomID, err := database.CreateRoom(context.Background(), room)
+	if err != nil {
+		t.Fatalf("CreateRoom: %v", err)
+	}
+	return
+}
+
+func createTestRoomInvite(t *testing.T, invite models.RoomInvite) {
+	if err := database.CreateRoomInvite(context.Background(), invite); err != nil {
+		t.Fatalf("CreateRoomInvite: %v", err)
+	}
+}
+
+func createTestRoomUser(t *testing.T, roomUser models.RoomUser) {
+	if err := database.AddUserToRoom(context.Background(), roomUser); err != nil {
+		t.Fatalf("AddUserToRoom: %v", err)
 	}
 }

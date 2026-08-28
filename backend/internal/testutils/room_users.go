@@ -2,18 +2,18 @@ package testutils
 
 import (
 	"context"
-	"log"
 	"testing"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
-func (tdb *TestDB) DeleteRoomUsersByUserID(t *testing.T, userID int64) {
+func (tdb *TestDB) DeleteRoomUsersByUserID(t *testing.T, userID models.UserID) {
 	_, err := tdb.pool.Exec(context.Background(),
 		`
 	DELETE FROM room_users WHERE user_id = $1
 	`,
 		userID)
 	if err != nil {
-		log.Printf("1231")
 		t.Fatalf("DeleteRoomUsersByUserID: %v", err)
 	}
 }
