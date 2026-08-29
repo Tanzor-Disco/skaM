@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
 	"github.com/jackc/pgerrcode"
@@ -24,7 +25,10 @@ func (db *DB) CreateUser(ctx context.Context, user models.User) error {
 	if errors.As(err, &PgErr) && PgErr.Code == pgerrcode.UniqueViolation {
 		err = apperrors.ErrEmailTaken
 	}
-	return err
+	if err != nil {
+		return fmt.Errorf("CreateUser: %w", err)
+	}
+	return nil
 }
 
 func (db *DB) GetUsers() ([]models.User, error) {
@@ -39,7 +43,7 @@ func (db *DB) GetUsers() ([]models.User, error) {
 	for rows.Next() {
 		var user models.User
 		if err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive); err != nil {
-			log.Println(err)
+			log.Printf("GetUsers: %v", err)
 			continue
 		}
 		users = append(users, user)
@@ -58,8 +62,9 @@ func (db *DB) GetUserByEmail(email string) (models.User, error) {
 		email).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
 	if errors.Is(err, pgx.ErrNoRows) {
 		err = apperrors.ErrUserNotFound
+		return user, fmt.Errorf("GetUserByEmail: %w", err)
 	}
-	return user, err
+	return user, nil
 }
 
 func (db *DB) GetUserByID(ctx context.Context, userID models.UserID) (models.User, error) {
@@ -69,8 +74,12 @@ func (db *DB) GetUserByID(ctx context.Context, userID models.UserID) (models.Use
 		SELECT * FROM users WHERE id = $1
 		`,
 		userID).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.LastYearActive)
+
 	if errors.Is(err, pgx.ErrNoRows) {
 		err = apperrors.ErrUserNotFound
 	}
-	return user, err
+	if err != nil {
+		return user, fmt.Errorf("GetUserByID: %w", err)
+	}
+	return user, nil
 }

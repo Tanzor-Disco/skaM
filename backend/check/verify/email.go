@@ -7,9 +7,11 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
-	"github.com/Tanzor-Disco/skaM/models"
+	"fmt"
 	"net/smtp"
 	"text/template"
+
+	"github.com/Tanzor-Disco/skaM/models"
 )
 
 // CreateToken generates a unique token for email confirmation.
@@ -21,7 +23,7 @@ func CreateToken() (string, string, error) {
 	raw := make([]byte, 32)
 	_, err := rand.Read(raw)
 	if err != nil {
-		return token, tokenHashed, err
+		return token, tokenHashed, fmt.Errorf("CreateToken: %w", err)
 	}
 	token = base64.RawURLEncoding.EncodeToString(raw)
 	sum := sha256.Sum256([]byte(token))
@@ -38,13 +40,13 @@ func getEmailBody(baseURL string, token string) (string, error) {
 	var body string
 	template, err := template.New("body").Parse(bodyEmbed)
 	if err != nil {
-		return body, err
+		return body, fmt.Errorf("getEmailBody: template.New: %w", err)
 	}
 	apiDest := baseURL + "/api/verify/email?token=" + token
 	var buf bytes.Buffer
 	err = template.Execute(&buf, apiDest)
 	if err != nil {
-		return body, err
+		return body, fmt.Errorf("getEmailBody: template.Execute: %w", err)
 	}
 	body = buf.String()
 	return body, nil
@@ -58,7 +60,7 @@ func SendEmail(token, to, baseURL string, data models.SMTPData) error {
 	}
 	body, err := getEmailBody(baseURL, token)
 	if err != nil {
-		return err
+		return fmt.Errorf("sendEmail: %w", err)
 	}
 	msg := []byte(
 		"To: " + to + "\r\n" +
@@ -67,5 +69,8 @@ func SendEmail(token, to, baseURL string, data models.SMTPData) error {
 			"Content-Type: text/html; charset=UTF-8\r\n" + "\r\n" +
 			body)
 	err = smtp.SendMail(data.Addr, auth, data.From, []string{to}, msg)
-	return err
+	if err != nil {
+		return fmt.Errorf("sendEmail: %w", err)
+	}
+	return nil
 }

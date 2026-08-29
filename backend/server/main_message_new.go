@@ -19,8 +19,8 @@ func (s *server) handleMainNewMessage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userSession, err := s.getUserSession(r)
 	if err != nil {
-		log.Printf("getUserSession: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
+		log.Printf("handleMainNewMessage: %v", err)
+		body := newServerResponseBody[any](apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
@@ -29,7 +29,7 @@ func (s *server) handleMainNewMessage(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&messageRequest)
 	if err != nil {
 		log.Printf("json.NewDecoder: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInvalidJSON, nil)
+		body := newServerResponseBody[any](apperrors.KindErrInvalidJSON, nil)
 		sendJSON(w, http.StatusBadRequest, body)
 		return
 	}
@@ -38,18 +38,18 @@ func (s *server) handleMainNewMessage(w http.ResponseWriter, r *http.Request) {
 	messageID, err := s.db.CreateMessage(ctx, message)
 	if err != nil {
 		log.Printf("CreateMessage: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		body := newServerResponseBody[any](apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 	user, err := s.db.GetUserByID(ctx, userSession.UserID)
 	if err != nil {
 		log.Printf("GetUserByID: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		body := newServerResponseBody[any](apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 	messageData := db.NewMessageData(messageID, userSession.UserID, messageRequest.RoomID, messageRequest.Text, user.Username)
-	body := newServerResponseBody(false, apperrors.KindErrNone, []db.MessageData{messageData})
+	body := newServerResponseBody(apperrors.KindErrNone, []db.MessageData{messageData})
 	sendJSON(w, http.StatusOK, body)
 }

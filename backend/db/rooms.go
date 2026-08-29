@@ -9,7 +9,7 @@ import (
 
 func (db *DB) CreateRoom(ctx context.Context, room models.Room) (models.RoomID, error) {
 	var roomID models.RoomID
-	err := db.pool.QueryRow(context.Background(),
+	err := db.pool.QueryRow(ctx,
 		`
 	INSERT INTO rooms (room_name)
 	VALUES ($1)
@@ -17,7 +17,11 @@ func (db *DB) CreateRoom(ctx context.Context, room models.Room) (models.RoomID, 
 	`,
 		room.Name,
 	).Scan(&roomID)
-	return roomID, err
+
+	if err != nil {
+		return roomID, fmt.Errorf("CreateRoom: %w", err)
+	}
+	return roomID, nil
 }
 
 func (db *DB) GetRoomByRoomID(ctx context.Context, roomID models.RoomID) (models.Room, error) {

@@ -48,7 +48,6 @@ func TestHandleMainNewRoom_Valid(t *testing.T) {
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}
@@ -69,7 +68,6 @@ func TestHandleMainNewRoom_NoSession(t *testing.T) {
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidSessionString,
 		CookieExist: false,
 	}
@@ -88,7 +86,6 @@ func TestHandleMainNewRoom_NoJSON(t *testing.T) {
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInternal,
 		CookieExist: false,
 	}
@@ -110,7 +107,6 @@ func TestHandleMainNewRoom_LongName(t *testing.T) {
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidRoomNameLength,
 		CookieExist: false,
 	}
@@ -130,7 +126,6 @@ func TestHandleMainNewRoom_ExtraFieldsJSON(t *testing.T) {
 	defer tdb.DeleteRoomUsersByUserID(t, userID)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}

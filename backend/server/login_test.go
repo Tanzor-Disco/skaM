@@ -50,7 +50,6 @@ func TestHandleLogin_Valid(t *testing.T) {
 	w := handleLoginDataDecode(t, userLogin)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: true,
 	}
@@ -65,7 +64,6 @@ func TestHandleLogin_NonExistent(t *testing.T) {
 	w := handleLoginDataDecode(t, userLogin)
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
-		Success:     false,
 		ErrKind:     apperrors.KindErrWrongLoginData,
 		CookieExist: false,
 	}
@@ -77,7 +75,6 @@ func TestHandleLogin_InvalidJSON(t *testing.T) {
 	w := handleLoginDataRaw(t, userLogin)
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInternal,
 		CookieExist: false,
 	}
@@ -107,7 +104,6 @@ func TestHandleLogin_Wrong_Password(t *testing.T) {
 	w := handleLoginDataDecode(t, userLogin)
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
-		Success:     false,
 		ErrKind:     apperrors.KindErrWrongLoginData,
 		CookieExist: false,
 	}

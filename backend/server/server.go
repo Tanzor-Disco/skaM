@@ -29,16 +29,14 @@ func newServer(serverData models.ServerData) (*server, error) {
 
 // serverResponseBody represents the JSON structure used in server responses
 type serverResponseBody[T any] struct {
-	Success   bool   `json:"success"`
 	ErrorKind string `json:"error_kind"`
 	Data      []T    `json:"data"`
 }
 
 // newServerResponseBody creates an instance of serverResponseBody
 // if no data is sent, nil should be used
-func newServerResponseBody[T any](success bool, errorKind string, data []T) serverResponseBody[T] {
+func newServerResponseBody[T any](errorKind string, data []T) serverResponseBody[T] {
 	return serverResponseBody[T]{
-		Success:   success,
 		ErrorKind: errorKind,
 		Data:      data,
 	}

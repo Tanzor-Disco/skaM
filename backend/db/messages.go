@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
@@ -34,7 +35,10 @@ func (db *DB) CreateMessage(ctx context.Context, message models.Message) (models
 	`,
 		message.UserId, message.RoomId, message.Text,
 	).Scan(&messageID)
-	return messageID, err
+	if err != nil {
+		return messageID, fmt.Errorf("CreateMessage: %w", err)
+	}
+	return messageID, nil
 }
 
 func (db *DB) GetMessageData(ctx context.Context, roomID models.RoomID) ([]MessageData, error) {
@@ -53,7 +57,7 @@ func (db *DB) GetMessageData(ctx context.Context, roomID models.RoomID) ([]Messa
 		var message MessageData
 		err := rows.Scan(&message.ID, &message.UserID, &message.RoomID, &message.Text, &message.Author)
 		if err != nil {
-			return make([]MessageData, 0), err
+			return make([]MessageData, 0), fmt.Errorf("GetMessageData: rows.Scan: %w", err)
 		}
 		messages = append(messages, message)
 	}

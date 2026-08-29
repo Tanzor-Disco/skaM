@@ -29,7 +29,6 @@ func TestHandleRequest_Valid(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}
@@ -48,7 +47,6 @@ func TestHandleRequest_Empty(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidEmail,
 		CookieExist: false,
 	}
@@ -66,7 +64,6 @@ func TestHandleRequest_InvalidEmail(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidEmail,
 		CookieExist: false,
 	}
@@ -91,7 +88,6 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}
@@ -109,7 +105,6 @@ func TestHandleRequest_InvalidUsernameLength(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidUsernameLength,
 		CookieExist: false,
 	}
@@ -128,7 +123,6 @@ func TestHandleRequest_InvalidPasswordChars(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrForbiddenPasswordChars,
 		CookieExist: false,
 	}
@@ -146,7 +140,6 @@ func TestHandleRequest_InvalidPasswordLength(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidPasswordLength,
 		CookieExist: false,
 	}

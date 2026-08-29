@@ -38,7 +38,6 @@ func TestInviteAdd_Valid(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}
@@ -56,8 +55,39 @@ func TestInviteAdd_No_user(t *testing.T) {
 
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidSessionString,
+		CookieExist: false,
+	}
+
+	verifyResponse(t, w, wanted)
+}
+
+func TestInviteAdd_Duplicate(t *testing.T) {
+	user := models.NewUser("testing@mail.com", "test_user", "123")
+	room := models.NewRoom("test_room")
+
+	userID := createTestUser(t, user)
+	roomID := createTestRoom(t, room)
+	roomUser := models.NewRoomUser(roomID, userID)
+	sessionString := createTestUserSession(t, userID)
+
+	createTestRoomUser(t, roomUser)
+
+	invite := models.NewRoomInvite(roomID, "123")
+	createTestRoomInvite(t, invite)
+	r := createEncodeRequest(t, invite, &sessionString)
+	w := httptest.NewRecorder()
+	srv.handleInviteAdd(w, r)
+
+	defer tdb.DeleteUsersByEmail(t, user.Email)
+	defer tdb.DeleteRoomByRoomID(t, roomID)
+	defer tdb.DeleteSessionsByUserID(t, userID)
+	defer tdb.DeleteRoomUsersByUserID(t, userID)
+	defer tdb.DeleteRoomInvitesByRoomID(t, roomID)
+
+	wanted := wantedResult{
+		Code:        http.StatusInternalServerError,
+		ErrKind:     apperrors.KindErrUniqueViolation,
 		CookieExist: false,
 	}
 

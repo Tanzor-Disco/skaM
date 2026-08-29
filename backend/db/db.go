@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -13,7 +14,7 @@ type DB struct {
 func Connect(URI string) (*DB, error) {
 	pool, err := pgxpool.New(context.Background(), URI)
 	if err != nil {
-		return &DB{}, err
+		return &DB{}, fmt.Errorf("Connect: %w", err)
 	}
 	return &DB{
 		pool: pool,

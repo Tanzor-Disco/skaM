@@ -64,7 +64,6 @@ func TestHandleMainRooms_Valid(t *testing.T) {
 	w := handleRooms(t, &sessionString)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}
@@ -75,7 +74,6 @@ func TestHandleMainRooms_No_SessionString(t *testing.T) {
 	w := handleRooms(t, nil)
 	wanted := wantedResult{
 		Code:        http.StatusUnauthorized,
-		Success:     false,
 		ErrKind:     apperrors.KindErrInvalidSessionString,
 		CookieExist: false,
 	}
@@ -93,7 +91,6 @@ func TestHandleMainRooms_No_Rooms(t *testing.T) {
 	w := handleRooms(t, &sessionString)
 	wanted := wantedResult{
 		Code:        http.StatusOK,
-		Success:     true,
 		ErrKind:     apperrors.KindErrNone,
 		CookieExist: false,
 	}

@@ -15,15 +15,15 @@ func (s *server) handleMainRooms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userSession, err := s.getUserSession(r)
 	if err != nil {
-		log.Printf("getUserSession: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
+		log.Printf("handleMainRooms: %v", err)
+		body := newServerResponseBody[any](apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
 	roomIDS, err := s.db.GetRoomIDSByUserID(ctx, userSession.UserID)
 	if err != nil {
 		log.Printf("handleMain: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		body := newServerResponseBody[any](apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
@@ -31,11 +31,11 @@ func (s *server) handleMainRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := s.db.GetRoomsByRoomIDS(ctx, roomIDS)
 	if err != nil {
 		log.Printf("handleMain: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInternal, nil)
+		body := newServerResponseBody[any](apperrors.KindErrInternal, nil)
 		sendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
-	body := newServerResponseBody(true, apperrors.KindErrNone, rooms)
+	body := newServerResponseBody(apperrors.KindErrNone, rooms)
 	sendJSON(w, http.StatusOK, body)
 }

@@ -15,7 +15,7 @@ func (db *DB) CreateRoomInvite(ctx context.Context, invite models.RoomInvite) er
 	`,
 		invite.RoomID, invite.Token)
 	if err != nil {
-		return fmt.Errorf("createRoomInvite: %w", err)
+		return fmt.Errorf("CreateRoomInvite: %w", err)
 	}
 	return nil
 }
@@ -43,7 +43,7 @@ func (db *DB) GetRoomInviteByInviteToken(ctx context.Context, inviteToken string
 	`,
 		inviteToken).Scan(&roomInvite.ID, &roomInvite.RoomID, &roomInvite.Token)
 	if err != nil {
-		return roomInvite, fmt.Errorf("getRoomInviteByroomID: queryRow: %w", err)
+		return roomInvite, fmt.Errorf("GetRoomInviteByroomID: queryRow: %w", err)
 	}
 	return roomInvite, nil
 }

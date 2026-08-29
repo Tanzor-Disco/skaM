@@ -10,11 +10,11 @@ import (
 func (s *server) handleRoot(w http.ResponseWriter, r *http.Request) {
 	_, err := s.getUserSession(r)
 	if err != nil {
-		log.Printf("getUserSession: %v", err)
-		body := newServerResponseBody[any](false, apperrors.KindErrInvalidSessionString, nil)
+		log.Printf("handleRoot: %v", err)
+		body := newServerResponseBody[any](apperrors.KindErrInvalidSessionString, nil)
 		sendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
-	body := newServerResponseBody[any](true, apperrors.KindErrNone, nil)
+	body := newServerResponseBody[any](apperrors.KindErrNone, nil)
 	sendJSON(w, http.StatusOK, body)
 }

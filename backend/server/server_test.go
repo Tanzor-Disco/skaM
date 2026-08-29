@@ -23,7 +23,7 @@ func loadURI() string {
 	//load the environment
 	err := godotenv.Load("../.env_test")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("loadURI: %v", err)
 	}
 	testURI := os.Getenv("TEST_URI")
 	return testURI
@@ -34,7 +34,7 @@ func setUpDB(testURI string) (*testutils.TestDB, *db.DB) {
 	//reset the db and update to the latest migration
 	err := migrations.Reset(testURI)
 	if err != nil {
-		log.Fatalf("migrations:%v", err)
+		log.Fatalf("migrations: %v", err)
 	}
 
 	//connect to db
@@ -94,7 +94,7 @@ func createEncodeRequest[T any](t *testing.T, body T, sessionString *string) *ht
 	t.Helper()
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		t.Fatalf("Didn't manage to encode body into bytes: %v", err)
+		t.Fatalf("createEncodeRequest: json.Marshal: %v", err)
 	}
 
 	r := httptest.NewRequest("POST", "/api/", bytes.NewReader(bodyBytes))
@@ -122,7 +122,6 @@ func createRawRequest(t *testing.T, body string, sessionString *string) *http.Re
 
 type wantedResult struct {
 	Code        int
-	Success     bool
 	ErrKind     string
 	CookieExist bool
 }
@@ -136,9 +135,6 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 	err := json.NewDecoder(w.Body).Decode(&gotBody)
 	if err != nil {
 		t.Fatalf("verifyResponse: couldn't decode the server response")
-	}
-	if gotBody.Success != wanted.Success {
-		t.Fatalf("verifyResponse: success of the response doesn't match:\n got %v\n wanted %v", gotBody.Success, wanted.Success)
 	}
 	if gotBody.ErrorKind != wanted.ErrKind {
 		t.Fatalf("verifyResponse: error kind of the response doesn't match:\n got %v\n wanted %v", gotBody.ErrorKind, wanted.ErrKind)
@@ -161,7 +157,7 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 func createTestUser(t *testing.T, user models.User) (userID models.UserID) {
 	t.Helper()
 	if err := database.CreateUser(context.Background(), user); err != nil {
-		t.Fatalf("CreateUser: %v", err)
+		t.Fatalf("createTestUser: CreateUser: %v", err)
 	}
 	userID = tdb.GetUserIDByEmail(t, user.Email)
 	return

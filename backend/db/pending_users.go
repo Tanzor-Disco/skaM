@@ -4,6 +4,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 
 	"context"
+	"fmt"
 	"log"
 	"time"
 )
@@ -20,7 +21,10 @@ func (db *DB) CreatePendingUser(ctx context.Context, user models.PendingUser) er
 	token_hash = EXCLUDED.token_hash,
 	expires_at = EXCLUDED.expires_at
 	`, user.Email, user.Username, user.PasswordHash, user.TokenHash, user.ExpiresAt)
-	return err
+	if err != nil {
+		return fmt.Errorf("CreatePendingUser: %w", err)
+	}
+	return nil
 }
 
 func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (models.PendingUser, error) {
@@ -30,7 +34,10 @@ func (db *DB) GetPendingUserByTokenHash(ctx context.Context, tokenHash string) (
 	SELECT * FROM pending_users WHERE token_hash=$1
 	`,
 		tokenHash).Scan(&user.Id, &user.Email, &user.Username, &user.PasswordHash, &user.TokenHash, &user.ExpiresAt)
-	return user, err
+	if err != nil {
+		return user, fmt.Errorf("GetPendingUserByTokenHash: %w", err)
+	}
+	return user, nil
 }
 
 func (db *DB) deleteExpired() error {
@@ -40,7 +47,7 @@ func (db *DB) deleteExpired() error {
 	`,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("deleteExpired: %w", err)
 	}
 	return nil
 }
@@ -50,7 +57,7 @@ func (db *DB) PeriodicPendingDelete() {
 	for range ticker.C {
 		err := db.deleteExpired()
 		if err != nil {
-			log.Printf("failed to delete expired users from pending: %v", err)
+			log.Printf("PeriodicPendingDelete: %v", err)
 		}
 	}
 }
