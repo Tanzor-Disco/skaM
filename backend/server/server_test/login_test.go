@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"context"
@@ -9,13 +9,16 @@ import (
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server/login"
 )
 
-func handleLoginDataDecode(t *testing.T, user userLoginData) *httptest.ResponseRecorder {
+func handleLoginDataDecode(t *testing.T, user login.UserLoginData) *httptest.ResponseRecorder {
 	t.Helper()
 	w := httptest.NewRecorder()
 	r := createEncodeRequest(t, user, nil)
-	srv.handleLogin(w, r)
+
+	loginHandler := login.NewLoginHandler(srv.DB)
+	loginHandler.HandleLogin(w, r)
 	return w
 }
 
@@ -23,7 +26,9 @@ func handleLoginDataRaw(t *testing.T, user string) *httptest.ResponseRecorder {
 	t.Helper()
 	w := httptest.NewRecorder()
 	r := createRawRequest(t, user, nil)
-	srv.handleLogin(w, r)
+
+	loginHandler := login.NewLoginHandler(srv.DB)
+	loginHandler.HandleLogin(w, r)
 	return w
 }
 
@@ -43,7 +48,7 @@ func TestHandleLogin_Valid(t *testing.T) {
 	userID := tdb.GetUserIDByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
-	userLogin := userLoginData{
+	userLogin := login.UserLoginData{
 		Email:    user.Email,
 		Password: "123",
 	}
@@ -57,7 +62,7 @@ func TestHandleLogin_Valid(t *testing.T) {
 }
 
 func TestHandleLogin_NonExistent(t *testing.T) {
-	userLogin := userLoginData{
+	userLogin := login.UserLoginData{
 		Email:    "non_existent@test.com",
 		Password: "123",
 	}
@@ -97,7 +102,7 @@ func TestHandleLogin_Wrong_Password(t *testing.T) {
 	userID := tdb.GetUserIDByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
-	userLogin := userLoginData{
+	userLogin := login.UserLoginData{
 		Email:    user.Email,
 		Password: "456",
 	}

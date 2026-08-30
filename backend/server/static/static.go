@@ -1,4 +1,4 @@
-package server
+package static
 
 import (
 	"embed"
@@ -9,7 +9,7 @@ import (
 //go:embed static
 var staticFS embed.FS
 
-func handleStatic(w http.ResponseWriter, r *http.Request) {
+func HandleStatic(w http.ResponseWriter, r *http.Request) {
 	path := "static" + r.URL.Path
 	indexPath := "static/index.html"
 

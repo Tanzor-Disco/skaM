@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server/room"
 )
 
 func createUserAndSession(t *testing.T, user models.User) (sessionString string, userID models.UserID) {
@@ -17,11 +18,13 @@ func createUserAndSession(t *testing.T, user models.User) (sessionString string,
 	return
 }
 
-func handleNewRoomEncode(t *testing.T, body RoomRegisterRequest, sessionString *string) *httptest.ResponseRecorder {
+func handleNewRoomEncode(t *testing.T, body room.RoomRegisterRequest, sessionString *string) *httptest.ResponseRecorder {
 	t.Helper()
 	r := createEncodeRequest(t, body, sessionString)
 	w := httptest.NewRecorder()
-	srv.handleMainNewRoom(w, r)
+
+	roomHandler := room.NewRoomHandler(srv.DB, srv.BaseURL)
+	roomHandler.HandleMainNewRoom(w, r)
 	return w
 }
 
@@ -29,7 +32,9 @@ func handleNewRoomRaw(t *testing.T, body string, sessionString *string) *httptes
 	t.Helper()
 	r := createRawRequest(t, body, sessionString)
 	w := httptest.NewRecorder()
-	srv.handleMainNewRoom(w, r)
+
+	roomHandler := room.NewRoomHandler(srv.DB, srv.BaseURL)
+	roomHandler.HandleMainNewRoom(w, r)
 	return w
 }
 
@@ -40,7 +45,7 @@ func TestHandleMainNewRoom_Valid(t *testing.T) {
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
-	reqBody := RoomRegisterRequest{
+	reqBody := room.RoomRegisterRequest{
 		Name: "room_test",
 	}
 	w := handleNewRoomEncode(t, reqBody, &sessionString)
@@ -60,7 +65,7 @@ func TestHandleMainNewRoom_NoSession(t *testing.T) {
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
-	reqBody := RoomRegisterRequest{
+	reqBody := room.RoomRegisterRequest{
 		Name: "room_test",
 	}
 	w := handleNewRoomEncode(t, reqBody, nil)
@@ -100,7 +105,7 @@ func TestHandleMainNewRoom_LongName(t *testing.T) {
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteSessionsByUserID(t, userID)
 
-	reqBody := RoomRegisterRequest{
+	reqBody := room.RoomRegisterRequest{
 		Name: "very_long_room_name_for_real_12331313131331331123213231313131313131331",
 	}
 	w := handleNewRoomEncode(t, reqBody, &sessionString)

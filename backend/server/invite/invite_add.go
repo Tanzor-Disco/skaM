@@ -1,4 +1,4 @@
-package server
+package invite
 
 import (
 	"encoding/json"
@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Tanzor-Disco/skaM/auth"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
+	"github.com/Tanzor-Disco/skaM/internal/utils"
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
@@ -18,49 +20,49 @@ type AddRequest struct {
 // it checks the session of the user, gets the room id through room invite
 // it creates a new room user, adds them to the table
 // it handles the unique violation in the table separately
-func (s *server) handleInviteAdd(w http.ResponseWriter, r *http.Request) {
+func (h *InviteHandler) HandleInviteAdd(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userSession, err := s.getUserSession(r)
+	userSession, err := auth.GetUserSession(r, h.db)
 	if err != nil {
 		log.Printf("handleInviteAdd: %v", err)
-		body := newServerResponseBody[any](apperrors.KindErrInvalidSessionString, nil)
-		sendJSON(w, http.StatusUnauthorized, body)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrInvalidSessionString, nil)
+		utils.SendJSON(w, http.StatusUnauthorized, body)
 		return
 	}
 
 	var addRequest AddRequest
 	if err = json.NewDecoder(r.Body).Decode(&addRequest); err != nil {
 		log.Printf("handleInviteAdd: Decode: %v", err)
-		body := newServerResponseBody[any](apperrors.KindErrInvalidJSON, nil)
-		sendJSON(w, http.StatusBadRequest, body)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrInvalidJSON, nil)
+		utils.SendJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
-	roomInvite, err := s.db.GetRoomInviteByInviteToken(ctx, addRequest.Token)
+	roomInvite, err := h.db.GetRoomInviteByInviteToken(ctx, addRequest.Token)
 	if err != nil {
 		log.Printf("handleInviteAdd: GetRoomInviteByInviteToken: %v", err)
-		body := newServerResponseBody[any](apperrors.KindErrInvalidInviteToken, nil)
-		sendJSON(w, http.StatusBadRequest, body)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrInvalidInviteToken, nil)
+		utils.SendJSON(w, http.StatusBadRequest, body)
 		return
 	}
 
 	roomUser := models.NewRoomUser(roomInvite.RoomID, userSession.UserID)
-	err = s.db.AddUserToRoom(ctx, roomUser)
+	err = h.db.AddUserToRoom(ctx, roomUser)
 
 	// a unique violation occurs when the user who is already in the room accepts an invite
 	if errors.Is(err, apperrors.ErrUniqueViolation) {
 		log.Printf("handleInviteAdd: AddUserToRoom: %v", err)
-		body := newServerResponseBody[any](apperrors.KindErrUniqueViolation, nil)
-		sendJSON(w, http.StatusInternalServerError, body)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrUniqueViolation, nil)
+		utils.SendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 	if err != nil {
 		log.Printf("handleInviteAdd: AddUserToRoom: %v", err)
-		body := newServerResponseBody[any](apperrors.KindErrInternal, nil)
-		sendJSON(w, http.StatusInternalServerError, body)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrInternal, nil)
+		utils.SendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 
-	body := newServerResponseBody[any](apperrors.KindErrNone, nil)
-	sendJSON(w, http.StatusOK, body)
+	body := utils.NewServerResponseBody[any](apperrors.KindErrNone, nil)
+	utils.SendJSON(w, http.StatusOK, body)
 }

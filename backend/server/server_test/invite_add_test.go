@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"net/http"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server/invite"
 )
 
 func handleInvite(t *testing.T, user *models.User, room *models.Room) (userID models.UserID, sessionString string, roomID models.RoomID, w *httptest.ResponseRecorder) {
@@ -18,11 +19,13 @@ func handleInvite(t *testing.T, user *models.User, room *models.Room) (userID mo
 	if room != nil {
 		roomID = createTestRoom(t, *room)
 	}
-	invite := models.NewRoomInvite(roomID, "123")
-	createTestRoomInvite(t, invite)
-	r := createEncodeRequest(t, invite, &sessionString)
+	currInvite := models.NewRoomInvite(roomID, "123")
+	createTestRoomInvite(t, currInvite)
+	r := createEncodeRequest(t, currInvite, &sessionString)
 	w = httptest.NewRecorder()
-	srv.handleInviteAdd(w, r)
+
+	inviteHandler := invite.NewInviteHandler(srv.DB)
+	inviteHandler.HandleInviteAdd(w, r)
 	return
 }
 
@@ -73,11 +76,13 @@ func TestInviteAdd_Duplicate(t *testing.T) {
 
 	createTestRoomUser(t, roomUser)
 
-	invite := models.NewRoomInvite(roomID, "123")
-	createTestRoomInvite(t, invite)
-	r := createEncodeRequest(t, invite, &sessionString)
+	currInvite := models.NewRoomInvite(roomID, "123")
+	createTestRoomInvite(t, currInvite)
+	r := createEncodeRequest(t, currInvite, &sessionString)
 	w := httptest.NewRecorder()
-	srv.handleInviteAdd(w, r)
+
+	inviteHandler := invite.NewInviteHandler(srv.DB)
+	inviteHandler.HandleInviteAdd(w, r)
 
 	defer tdb.DeleteUsersByEmail(t, user.Email)
 	defer tdb.DeleteRoomByRoomID(t, roomID)

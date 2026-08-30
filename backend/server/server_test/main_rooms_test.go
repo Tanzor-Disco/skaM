@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/auth"
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server/room"
 )
 
 func createUserSessionRooms(t *testing.T, user models.User, rooms []models.Room) (userID models.UserID, sessionString string, roomIDs []models.RoomID) {
@@ -46,7 +47,9 @@ func createUserSessionRooms(t *testing.T, user models.User, rooms []models.Room)
 func handleRooms(t *testing.T, sessionString *string) *httptest.ResponseRecorder {
 	r := createRawRequest(t, "", sessionString)
 	w := httptest.NewRecorder()
-	srv.handleMainRooms(w, r)
+
+	roomHandler := room.NewRoomHandler(srv.DB, srv.BaseURL)
+	roomHandler.HandleMainRooms(w, r)
 	return w
 }
 

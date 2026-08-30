@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"net/http"
@@ -7,13 +7,16 @@ import (
 
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server/register"
 )
 
 func handleUser(t *testing.T, user models.RegisterRequest) *httptest.ResponseRecorder {
 	t.Helper()
 	r := createEncodeRequest(t, user, nil)
 	w := httptest.NewRecorder()
-	srv.handleRegister(w, r)
+
+	registerHandler := register.NewRegisterHandler(srv.DB, srv.BaseURL, srv.SMTPData)
+	registerHandler.HandleRegister(w, r)
 	return w
 }
 

@@ -1,4 +1,4 @@
-package server
+package servertest
 
 import (
 	"bytes"
@@ -15,13 +15,15 @@ import (
 	"github.com/Tanzor-Disco/skaM/db"
 	"github.com/Tanzor-Disco/skaM/db/migrations"
 	"github.com/Tanzor-Disco/skaM/internal/testutils"
+	"github.com/Tanzor-Disco/skaM/internal/utils"
 	"github.com/Tanzor-Disco/skaM/models"
+	"github.com/Tanzor-Disco/skaM/server"
 	"github.com/lpernett/godotenv"
 )
 
 func loadURI() string {
 	//load the environment
-	err := godotenv.Load("../.env_test")
+	err := godotenv.Load("../../.env_test")
 	if err != nil {
 		log.Fatalf("loadURI: %v", err)
 	}
@@ -58,18 +60,18 @@ func runSMTPServer() *exec.Cmd {
 	return cmd
 }
 
-func createServerData(testURI string) *server {
+func createServerData(testURI string) *server.Server {
 	TestBaseURL := "http://localhost:8080"
 	TestSMTPData := models.NewSMTPData("", "", "localhost", "localhost:1025", "test@example.com")
 	TestServerData := models.NewServerData(testURI, TestBaseURL, TestSMTPData)
-	srv, err := newServer(TestServerData)
+	srv, err := server.NewServer(TestServerData)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return srv
 }
 
-var srv *server
+var srv *server.Server
 var tdb *testutils.TestDB
 var database *db.DB
 
@@ -82,7 +84,7 @@ func TestMain(m *testing.M) {
 	//launch and finish the tests
 	code := m.Run()
 	tdb.Close()
-	srv.db.Close()
+	srv.DB.Close()
 	cmd.Process.Kill()
 	os.Exit(code)
 }
@@ -131,7 +133,7 @@ func verifyResponse(t *testing.T, w *httptest.ResponseRecorder, wanted wantedRes
 	if w.Code != wanted.Code {
 		t.Fatalf("verifyResponse: code of the response doesn't match:\n got %v\n wanted %v", w.Code, wanted.Code)
 	}
-	var gotBody serverResponseBody[any]
+	var gotBody utils.ServerResponseBody[any]
 	err := json.NewDecoder(w.Body).Decode(&gotBody)
 	if err != nil {
 		t.Fatalf("verifyResponse: couldn't decode the server response")
