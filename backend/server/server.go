@@ -8,7 +8,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/server/invite"
 	"github.com/Tanzor-Disco/skaM/server/login"
 	"github.com/Tanzor-Disco/skaM/server/message"
-	"github.com/Tanzor-Disco/skaM/server/page-main"
+	"github.com/Tanzor-Disco/skaM/server/page_main"
 	"github.com/Tanzor-Disco/skaM/server/register"
 	"github.com/Tanzor-Disco/skaM/server/room"
 	"github.com/Tanzor-Disco/skaM/server/root"

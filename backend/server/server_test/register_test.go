@@ -22,7 +22,7 @@ func handleUser(t *testing.T, user models.RegisterRequest) *httptest.ResponseRec
 
 func TestHandleRequest_Valid(t *testing.T) {
 	user := models.RegisterRequest{
-		Email:    "pidoras_@mail.ru",
+		Email:    "pidoras@gmail.com",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
@@ -75,12 +75,12 @@ func TestHandleRequest_InvalidEmail(t *testing.T) {
 
 func TestHandleRequest_Duplicate(t *testing.T) {
 	userPrev := models.RegisterRequest{
-		Email:    "pidoras_@mail.ru",
+		Email:    "pidoras@gmail.com",
 		Username: "pidoras",
 		Password: "2313112313",
 	}
 	user := models.RegisterRequest{
-		Email:    "pidoras_@mail.ru",
+		Email:    "pidoras@gmail.com",
 		Username: "pidoras_new",
 		Password: "1321313213131",
 	}
@@ -99,7 +99,7 @@ func TestHandleRequest_Duplicate(t *testing.T) {
 
 func TestHandleRequest_InvalidUsernameLength(t *testing.T) {
 	user := models.RegisterRequest{
-		Email:    "example_@mail.ru",
+		Email:    "example@gmail.com",
 		Username: "125151512515353255151551142144241241",
 		Password: "12321331123",
 	}
@@ -116,7 +116,7 @@ func TestHandleRequest_InvalidUsernameLength(t *testing.T) {
 
 func TestHandleRequest_InvalidPasswordChars(t *testing.T) {
 	user := models.RegisterRequest{
-		Email:    "example@mail.ru",
+		Email:    "example@gmail.com",
 		Username: "huylo",
 		Password: "фывфывфйцуйцуол",
 	}
@@ -134,7 +134,7 @@ func TestHandleRequest_InvalidPasswordChars(t *testing.T) {
 
 func TestHandleRequest_InvalidPasswordLength(t *testing.T) {
 	user := models.RegisterRequest{
-		Email:    "example@mail.ru",
+		Email:    "example@gmail.com",
 		Username: "huylo",
 		Password: "12313131331313113131313132131313131313131313131313131313131331313131313131313131313131313",
 	}
@@ -144,6 +144,23 @@ func TestHandleRequest_InvalidPasswordLength(t *testing.T) {
 	wanted := wantedResult{
 		Code:        http.StatusBadRequest,
 		ErrKind:     apperrors.KindErrInvalidPasswordLength,
+		CookieExist: false,
+	}
+	verifyResponse(t, w, wanted)
+}
+
+func TestHandleRequest_InvalidEmailType(t *testing.T) {
+	user := models.RegisterRequest{
+		Email:    "example@mail.ru",
+		Username: "huylo",
+		Password: "123131",
+	}
+	w := handleUser(t, user)
+	defer tdb.DeletePendingUsersByEmail(t, user.Email)
+
+	wanted := wantedResult{
+		Code:        http.StatusBadRequest,
+		ErrKind:     apperrors.KindErrInvalidEmail,
 		CookieExist: false,
 	}
 	verifyResponse(t, w, wanted)

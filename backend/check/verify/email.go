@@ -60,7 +60,7 @@ func SendEmail(token, to, baseURL string, data models.SMTPData) error {
 	}
 	body, err := getEmailBody(baseURL, token)
 	if err != nil {
-		return fmt.Errorf("sendEmail: %w", err)
+		return fmt.Errorf("sendEmail: getEmailBody: %w", err)
 	}
 	msg := []byte(
 		"To: " + to + "\r\n" +
@@ -70,7 +70,7 @@ func SendEmail(token, to, baseURL string, data models.SMTPData) error {
 			body)
 	err = smtp.SendMail(data.Addr, auth, data.From, []string{to}, msg)
 	if err != nil {
-		return fmt.Errorf("sendEmail: %w", err)
+		return fmt.Errorf("sendEmail: SendMail: %w", err)
 	}
 	return nil
 }

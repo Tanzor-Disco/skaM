@@ -3,8 +3,16 @@ import FormField from '@/components/form-field/FormField'
 import { useState } from 'react'
 import type { Dispatch, SetStateAction, SyntheticEvent } from 'react'
 
+import { emailValid, usernameValid, passwordValid } from '@/utils/validate'
+
 interface RegisterFormProps {
     setRegisterComplete: Dispatch<SetStateAction<boolean>>
+}
+
+interface RegisterSubmit {
+    email: string
+    username: string
+    password: string
 }
 
 export default function RegisterForm({
@@ -38,26 +46,56 @@ export default function RegisterForm({
     function toggleAllOff() {
         setEmailErr('')
         setUsernameErr('')
+        setPasswordErr('')
+    }
+
+    function registerSubmitValid(submit: RegisterSubmit): boolean {
+        toggleAllOff()
+        if (!emailValid(submit.email)) {
+            setEmailErr(
+                'Invalid Email: the site accepts proton, tuta and gmail'
+            )
+            return false
+        }
+        if (!usernameValid(submit.username)) {
+            setUsernameErr(
+                'The maximum length should be no more than 20 characters'
+            )
+            return false
+        }
+        if (!passwordValid(submit.password)) {
+            setPasswordErr(
+                'Password should be no more than 70 characters and consist only of latin character and numbers'
+            )
+            return false
+        }
+        return true
     }
 
     async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
+        toggleAllOff()
         event.preventDefault()
         const form = event.currentTarget
         const formData = new FormData(form)
-        const objData = Object.fromEntries(formData)
+        const registerSubmit: RegisterSubmit = {
+            email: formData.get('email') as string,
+            username: formData.get('username') as string,
+            password: formData.get('password') as string,
+        }
         form.reset()
+        if (!registerSubmitValid(registerSubmit)) {
+            return
+        }
         const response = await fetch('/api/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(objData),
+            body: JSON.stringify(registerSubmit),
         })
 
         if (!response.ok) {
             const responseObj = await response.json()
-            console.log(responseObj)
-            toggleAllOff()
             toggleState(responseObj.error_kind)
             return
         }

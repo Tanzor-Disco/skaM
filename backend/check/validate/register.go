@@ -3,18 +3,24 @@ package validate
 import (
 	"github.com/Tanzor-Disco/skaM/internal/apperrors"
 	"github.com/Tanzor-Disco/skaM/models"
-	"net/mail"
+	"regexp"
 )
 
 func validateEmail(address string) error {
-	addr, err := mail.ParseAddress(address)
-	if err == nil && addr.Address == address {
-		return nil
-	}
 	if len(address) > 300 {
 		return apperrors.ErrInvalidEmailLength
 	}
-	return apperrors.ErrInvalidEmail
+
+	matched, err := regexp.MatchString(
+		`^[a-zA-Z0-9_-]+@(gmail\.com|protonmail\.com|proton\.me|tutamail\.com|tuta\.com|tutanota\.com|tutanota\.de)$`,
+		address,
+	)
+	if !matched || err != nil {
+		return apperrors.ErrInvalidEmail
+	}
+
+	return nil
+
 }
 
 func isLatin(char rune) bool {
