@@ -1,17 +1,11 @@
-import type { Dispatch, SetStateAction } from 'react'
-import type { MessageData } from '@/models/MessageData'
 import './RoomChatInput.css'
 import type { Room } from '@/models/Room'
 
 interface RoomChatInputProps {
-    setMessages: Dispatch<SetStateAction<Array<MessageData>>>
     currentRoom: Room
 }
 
-export default function RoomChatInput({
-    setMessages,
-    currentRoom,
-}: RoomChatInputProps) {
+export default function RoomChatInput({ currentRoom }: RoomChatInputProps) {
     async function handleSubmit(formData: FormData) {
         const data = {
             ...Object.fromEntries(formData),
@@ -28,9 +22,6 @@ export default function RoomChatInput({
             console.warn("Didn't recieve StatusOK", response)
             return
         }
-        const respObj = await response.json()
-        const newMessage = respObj.data[0]
-        setMessages((prevMessages) => [...prevMessages, newMessage])
     }
     return (
         <form className="room-chat-form" action={handleSubmit}>

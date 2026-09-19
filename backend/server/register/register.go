@@ -20,6 +20,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterHandler represents a list of dependencies that are passed from the server package to message package
 type RegisterHandler struct {
 	db       *db.DB
 	baseURL  string
@@ -47,6 +48,9 @@ func (h *RegisterHandler) checkEmailTaken(email string) error {
 	return apperrors.ErrEmailTaken
 }
 
+// getUserData recieves the *http.request, decodes the body
+// validates the fields of the RegisterRequest,
+// checks if the email is taken
 func (s *RegisterHandler) getUserData(request *http.Request) (models.RegisterRequest, error) {
 	var currUser models.RegisterRequest
 	err := json.NewDecoder(request.Body).Decode(&currUser)
@@ -61,6 +65,7 @@ func (s *RegisterHandler) getUserData(request *http.Request) (models.RegisterReq
 	return currUser, err
 }
 
+// getUserDataErrorBody recieves an error from getUserData and return the approporiate server response body
 func getUserDataErrorBody(err error) utils.ServerResponseBody[any] {
 	var body utils.ServerResponseBody[any]
 	switch {

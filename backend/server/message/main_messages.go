@@ -10,6 +10,10 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
+// HandleMainMessages handles requests to api/main/messages
+// it gets the room id from the request query param,
+// does an sql query to get a slice of MessageData
+// encodes the slice in json, sends it as a response
 func (h *MessageHandler) HandleMainMessages(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	roomIDString := r.URL.Query().Get("room_id")

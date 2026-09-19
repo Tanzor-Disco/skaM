@@ -11,6 +11,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
+// MainHandler represents a list of dependencies that are passed from the server package to message package
 type MainHandler struct {
 	db *db.DB
 }
@@ -21,6 +22,8 @@ func NewMainHandler(db *db.DB) MainHandler {
 	}
 }
 
+// HandleMain handles the http requests sent to /api/main
+// it checks the user session and sends the error as response if the session is not valid
 func (h *MainHandler) HandleMain(w http.ResponseWriter, r *http.Request) {
 	userSession, err := auth.GetUserSession(r, h.db)
 	if err != nil {

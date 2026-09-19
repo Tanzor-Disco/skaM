@@ -17,6 +17,11 @@ type MessageRegisterRequest struct {
 	Text   string
 }
 
+// HandleMainNewMessage handles http request sent to /api/new/message
+// it checks the user session, decodes MessageRegisterRequest
+// creates a new message, inserts it into messages table,
+// forms a new instance of MessageData struct
+// sends the messageData to all the room users through websocket
 func (h *MessageHandler) HandleMainNewMessage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userSession, err := auth.GetUserSession(r, h.db)
@@ -30,7 +35,7 @@ func (h *MessageHandler) HandleMainNewMessage(w http.ResponseWriter, r *http.Req
 	var messageRequest MessageRegisterRequest
 	err = json.NewDecoder(r.Body).Decode(&messageRequest)
 	if err != nil {
-		log.Printf("json.NewDecoder: %v", err)
+		log.Printf("handleMainNewMessage: json.NewDecoder: %v", err)
 		body := utils.NewServerResponseBody[any](apperrors.KindErrInvalidJSON, nil)
 		utils.SendJSON(w, http.StatusBadRequest, body)
 		return
@@ -39,19 +44,29 @@ func (h *MessageHandler) HandleMainNewMessage(w http.ResponseWriter, r *http.Req
 	message := models.NewMessage(userSession.UserID, messageRequest.RoomID, messageRequest.Text)
 	messageID, err := h.db.CreateMessage(ctx, message)
 	if err != nil {
-		log.Printf("CreateMessage: %v", err)
+		log.Printf("handleMainNewMessage: CreateMessage: %v", err)
 		body := utils.NewServerResponseBody[any](apperrors.KindErrInternal, nil)
 		utils.SendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
+
 	user, err := h.db.GetUserByID(ctx, userSession.UserID)
 	if err != nil {
-		log.Printf("GetUserByID: %v", err)
+		log.Printf("handleMainNewMessage: GetUserByID: %v", err)
 		body := utils.NewServerResponseBody[any](apperrors.KindErrInternal, nil)
 		utils.SendJSON(w, http.StatusInternalServerError, body)
 		return
 	}
 	messageData := db.NewMessageData(messageID, userSession.UserID, messageRequest.RoomID, messageRequest.Text, user.Username)
+	roomUsers, err := h.db.GetRoomUsersByRoomID(ctx, messageRequest.RoomID)
+	if err != nil {
+		log.Printf("handleMainNewMessage: GetRoomUsersByRoomID: %v", err)
+		body := utils.NewServerResponseBody[any](apperrors.KindErrInternal, nil)
+		utils.SendJSON(w, http.StatusInternalServerError, body)
+		return
+	}
+	h.hub.SendMessageData(roomUsers, messageData)
+
 	body := utils.NewServerResponseBody(apperrors.KindErrNone, []db.MessageData{messageData})
 	utils.SendJSON(w, http.StatusOK, body)
 }

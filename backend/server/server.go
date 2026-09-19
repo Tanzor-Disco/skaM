@@ -13,15 +13,17 @@ import (
 	"github.com/Tanzor-Disco/skaM/server/room"
 	"github.com/Tanzor-Disco/skaM/server/root"
 	"github.com/Tanzor-Disco/skaM/server/static"
+	"github.com/Tanzor-Disco/skaM/server/websocket"
 )
 
 type Server struct {
 	DB       *db.DB
 	SMTPData models.SMTPData
 	BaseURL  string
+	WsHub    websocket.WsHub
 }
 
-// newServer creates a new server instance that stores db struct and SMTPData
+// newServer creates a new server instance that stores db struct, BaseURL, SMTPData, WsHub
 func NewServer(serverData models.ServerData) (*Server, error) {
 	db, err := db.Connect(serverData.URI)
 	if err != nil {
@@ -31,9 +33,14 @@ func NewServer(serverData models.ServerData) (*Server, error) {
 		DB:       db,
 		SMTPData: serverData.SMTPData,
 		BaseURL:  serverData.BaseURL,
+		WsHub:    websocket.NewWsHub(),
 	}, nil
 }
 
+// Run launches the server
+// it creates handlers for different endpoint groups
+// sets up handler functions
+// initiates a periodic data cleanups as goroutines
 func Run(serverData models.ServerData) error {
 	server, err := NewServer(serverData)
 	if err != nil {
@@ -41,12 +48,13 @@ func Run(serverData models.ServerData) error {
 	}
 
 	roomHandler := room.NewRoomHandler(server.DB, server.BaseURL)
-	messageHandler := message.NewMessageHandler(server.DB)
+	messageHandler := message.NewMessageHandler(server.DB, &server.WsHub)
 	loginHandler := login.NewLoginHandler(server.DB)
 	mainHandler := page_main.NewMainHandler(server.DB)
 	inviteHandler := invite.NewInviteHandler(server.DB)
 	rootHandler := root.NewRootHandler(server.DB)
 	registerHandler := register.NewRegisterHandler(server.DB, server.BaseURL, server.SMTPData)
+	wsHandler := websocket.NewWsHandler(server.DB, &server.WsHub, server.BaseURL)
 
 	http.HandleFunc("/", static.HandleStatic)
 
@@ -69,6 +77,8 @@ func Run(serverData models.ServerData) error {
 	http.HandleFunc("/api/main/new/message", messageHandler.HandleMainNewMessage)
 
 	http.HandleFunc("/api/invite/add", inviteHandler.HandleInviteAdd)
+
+	http.HandleFunc("/api/ws", wsHandler.HandleWs)
 
 	go server.DB.PeriodicPendingDelete()
 	go server.DB.PeriodicDeleteAllExpiredSessions()

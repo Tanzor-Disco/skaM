@@ -11,6 +11,10 @@ import (
 	"github.com/Tanzor-Disco/skaM/models"
 )
 
+// HandleMainRoomInvite handles the http requests sent to /api/main/room/invite
+// it checks the user session, get room id from request query param,
+// checks if the user is in the requested room
+// gets the room invite, create an invite URL, sends it as the response
 func (h *RoomHandler) HandleMainRoomInvite(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userSession, err := auth.GetUserSession(r, h.db)

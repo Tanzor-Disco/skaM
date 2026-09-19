@@ -59,3 +59,24 @@ func (db *DB) ValidateRoomUser(ctx context.Context, userID models.UserID, roomID
 	}
 	return nil
 }
+
+func (db *DB) GetRoomUsersByRoomID(ctx context.Context, roomID models.RoomID) ([]models.RoomUser, error) {
+	rows, err := db.pool.Query(ctx,
+		`
+	SELECT * FROM room_users WHERE room_id=$1
+	`,
+		roomID)
+	if err != nil {
+		return make([]models.RoomUser, 0), fmt.Errorf("GetRoomUsersByRoomID: pool.Query: %v", err)
+	}
+	var roomUsers []models.RoomUser
+	for rows.Next() {
+		var roomUser models.RoomUser
+		err := rows.Scan(&roomUser.ID, &roomUser.RoomID, &roomUser.UserID)
+		if err != nil {
+			return make([]models.RoomUser, 0), fmt.Errorf("GetRoomUsersByRoomID: rows.Scan: %v", err)
+		}
+		roomUsers = append(roomUsers, roomUser)
+	}
+	return roomUsers, nil
+}

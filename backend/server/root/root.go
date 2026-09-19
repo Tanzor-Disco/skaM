@@ -10,6 +10,7 @@ import (
 	"github.com/Tanzor-Disco/skaM/internal/utils"
 )
 
+// RootHandler represents a list of dependencies that are passed from the server package to message package
 type RootHandler struct {
 	db *db.DB
 }

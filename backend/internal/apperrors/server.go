@@ -33,4 +33,5 @@ const (
 	KindErrInvalidJSON            = "ERR_INVALID_JSON"
 	KindErrInvalidInviteToken     = "ERR_INVALID_INVITE_TOKEN"
 	KindErrUniqueViolation        = "ERR_UNIQUE_VIOLATION"
+	KindErrWebsocketUpgrade       = "ERR_WEBSOCKET_FAILED_UPGRADE"
 )

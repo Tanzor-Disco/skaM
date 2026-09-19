@@ -1,6 +1,6 @@
 services:
   backend:
-    image: skam-backend:latest
+    build: ./backend
     ports:
       - "8080:8080"
     networks:
